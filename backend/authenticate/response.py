@@ -17,10 +17,11 @@ def login(request: WSGIRequest):
         return JsonResponse({"error": "Invalid request body"}, status=400)
     user = authenticate(request, username=data["username"], password=data["password"])
     if user is not None:
-        return JsonResponse({"status": "Ok"}, status=200)
-    auth_login(request, user)
+        return JsonResponse({"error": "Invalid username or password"}, status=403)
 
-    return JsonResponse({"error": "Invalid username or password"}, status=403)
+    auth_login(request, user)
+    return JsonResponse({"status": "Ok"}, status=200)
+
 
 
 @require_http_methods(["GET"])
