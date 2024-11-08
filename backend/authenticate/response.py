@@ -2,7 +2,7 @@ from json import JSONDecodeError
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_GET
 from django.core.handlers.wsgi import WSGIRequest
 import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
@@ -49,8 +49,11 @@ def logout(request: WSGIRequest):
 
 
 @require_http_methods(["POST"])
-def register(request: WSGIRequest, invite_code):
-    ...
+def register(request: WSGIRequest):
+        return JsonResponse({
+            "status": "Error",
+            "error": "Not implemented",
+        }, status=501)
 
 
 @require_http_methods(["POST"])
@@ -110,3 +113,14 @@ def not_logged_in(request: WSGIRequest):
         "status": "Error",
         "error": "You are not logged in",
     }, status=401)
+
+
+@login_required
+@require_GET
+def user_info(request: WSGIRequest):
+    user_data_obj = UserData.objects.get(user=request.user)
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+        "user_data": None,
+    }, status=200)
