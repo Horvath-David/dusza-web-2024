@@ -17,7 +17,6 @@ import {
 import { Button } from "~/components/ui/button.tsx";
 import { makeRequest } from "~/lib/api";
 import { Category, ProgrammingLanguage, School } from "~/lib/models";
-import { createStore } from "solid-js/store";
 import {
   NumberField,
   NumberFieldDecrementTrigger,
@@ -33,51 +32,6 @@ interface IDOption {
   label: string;
 }
 
-const ALL_SHOOL: IDOption[] = [
-  {
-    value: 1,
-    label: "Mechwart",
-  },
-  {
-    value: 2,
-    label: "Fazekas",
-  },
-  {
-    value: 3,
-    label: "TÁG",
-  },
-];
-
-const ALL_CATEGORY: IDOption[] = [
-  {
-    value: 1,
-    label: "Info",
-  },
-  {
-    value: 2,
-    label: "Web",
-  },
-  {
-    value: 3,
-    label: "Hálózat",
-  },
-];
-
-const ALL_PROGRAMMING_LANGS: IDOption[] = [
-  {
-    value: 1,
-    label: "Python",
-  },
-  {
-    value: 2,
-    label: "Java",
-  },
-  {
-    value: 3,
-    label: "C#",
-  },
-];
-
 async function getProgLangs() {
   const res = await makeRequest<{
     status: string;
@@ -86,7 +40,7 @@ async function getProgLangs() {
   }>({
     endpoint: "/prog_lang/all",
   });
-  return res.data;
+  return res.data?.list ?? [];
 }
 
 async function getCategory() {
@@ -97,7 +51,7 @@ async function getCategory() {
   }>({
     endpoint: "/category/all",
   });
-  return res.data;
+  return res.data?.list ?? [];
 }
 
 async function getSchool() {
@@ -108,7 +62,7 @@ async function getSchool() {
   }>({
     endpoint: "/school/all",
   });
-  return res.data;
+  return res.data?.list ?? [];
 }
 
 const NewTeam: Component<{}> = () => {
@@ -123,48 +77,38 @@ const NewTeam: Component<{}> = () => {
   const [substituteTeamMateName, setSubstitudeTeamMateName] = createSignal("");
   const [substituteTeamMateGrade, setSubstitudeTeamMateGrade] = createSignal(8);
 
-  const [allProgLang, setAllProgLang] = createStore([""]);
-  const [allCategory, setAllCategory] = createStore([""]);
-  const [allSchool, setAllSchool] = createStore([""]);
-
-  const [allProgLangObj, setAllProgLangObj] = createStore([{}]);
-  const [allCategoryObj, setAllCategoryObj] = createStore([{}]);
-  const [allSchoolObj, setAllSchoolObj] = createStore([{}]);
-
   const [teacher, setTeacher] = createSignal("");
 
-  onMount(async () => {
-    const resProg = await getProgLangs();
-    resProg?.list.forEach((element) => {
-      setAllProgLang([...allProgLang, element.name]);
-      setAllProgLangObj([
-        ...allProgLangObj,
-        { id: element.id, name: element.name },
-      ]);
-    });
-
-    const resCat = await getCategory();
-    resCat?.list.forEach((element) => {
-      setAllCategory([...allCategory, element.name]);
-      setAllCategoryObj([
-        ...allCategoryObj,
-        { id: element.id, name: element.name },
-      ]);
-    });
-
-    const resSch = await getSchool();
-    resSch?.list.forEach((element) => {
-      setAllSchool([...allSchool, element.name]);
-      setAllSchoolObj([
-        ...allSchoolObj,
-        { id: element.id, name: element.name },
-      ]);
-    });
-  });
+  const [allProgLang, setAllProgLang] = createSignal<IDOption[]>([]);
+  const [allCategory, setAllCategory] = createSignal<IDOption[]>([]);
+  const [allSchool, setAllSchool] = createSignal<IDOption[]>([]);
 
   const [school, setSchool] = createSignal<IDOption>();
   const [category, setCategory] = createSignal<IDOption>();
   const [programmingLang, setProgrammingLang] = createSignal<IDOption>();
+
+  onMount(async () => {
+    setAllSchool(
+      (await getSchool()).map((x) => ({
+        value: x.id,
+        label: x.name,
+      })),
+    );
+
+    setAllCategory(
+      (await getCategory()).map((x) => ({
+        value: x.id,
+        label: x.name,
+      })),
+    );
+
+    setAllProgLang(
+      (await getProgLangs()).map((x) => ({
+        value: x.id,
+        label: x.name,
+      })),
+    );
+  });
 
   return (
     <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
@@ -280,7 +224,7 @@ const NewTeam: Component<{}> = () => {
 
       {/* School selection */}
       <Combobox<IDOption>
-        options={ALL_SHOOL}
+        options={allSchool()}
         optionValue="value"
         optionTextValue="label"
         optionLabel="label"
@@ -305,7 +249,7 @@ const NewTeam: Component<{}> = () => {
 
       {/* Category selection */}
       <Combobox<IDOption>
-        options={ALL_CATEGORY}
+        options={allCategory()}
         optionValue="value"
         optionTextValue="label"
         optionLabel="label"
@@ -330,7 +274,7 @@ const NewTeam: Component<{}> = () => {
 
       {/* Language selection */}
       <Combobox<IDOption>
-        options={ALL_PROGRAMMING_LANGS}
+        options={allProgLang()}
         optionValue="value"
         optionTextValue="label"
         optionLabel="label"
