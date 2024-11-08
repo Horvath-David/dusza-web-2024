@@ -23,6 +23,7 @@ export const UserProvider = (props: ParentProps) => {
       status: string;
       error: string;
       user_data: UserData;
+      user_name: string;
     }>({
       endpoint: "/me/",
     });

@@ -40,7 +40,7 @@ const Sidebar: Component<{}> = () => {
         <div class="aspect-square rounded-lg bg-gradient-to-tr from-purple-700 to-cyan-400 p-1 text-sm font-black">
           DP
         </div>
-        <div class="font-bold uppercase">DuszaPanel</div>
+        <div class="font-bold uppercase [letter-spacing:1.5px]">DuszaPanel</div>
       </div>
       <Hr padding="1rem" />
     </div>
