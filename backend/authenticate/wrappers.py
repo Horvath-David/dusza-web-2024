@@ -1,9 +1,14 @@
 from functools import wraps
 from django.http import JsonResponse
 from api.models import UserData
+from api.models import ROLE_CHOICES
+
+role_options = list(dict(ROLE_CHOICES).keys())
 
 
 def require_role(role_list):
+    if all(x in role_list for x in role_options):
+        raise ValueError(f"Invalid role(s) \"{role_list}\"")
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
