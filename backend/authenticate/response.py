@@ -79,3 +79,9 @@ def change_password(request: WSGIRequest):
     request.user.save()
 
     return JsonResponse({"status": "Ok"}, status=200)
+
+def not_logged_in(request: WSGIRequest):
+    return JsonResponse({
+        "status": "Error",
+        "error": "You are not logged in",
+    }, status=401)
