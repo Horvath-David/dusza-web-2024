@@ -4,9 +4,15 @@ from django.db.models import Model, ManyToManyField
 
 # Create your models here.
 ROLE_CHOICES = (
-    ('contestant', 'Contestant'),
-    ('organizer', 'Organizer'),
-    ('school', 'School communicator'),
+    ('contestant', 'Versenyző'),
+    ('organizer', 'Szervező'),
+    ('school', 'Iskolai kapcsolattartó'),
+)
+
+TEAM_STATUSES = (
+    ('registered', 'Regisztrált'),
+    ('approved_by_organizer', 'Szervező által jóváhagyva'),
+    ('approved_by_school', 'Iskola által jóváhagyva'),
 )
 
 
@@ -63,6 +69,7 @@ class Team(models.Model):
     teacher_name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     prog_lang = models.ForeignKey(ProgrammingLanguage, on_delete=models.CASCADE)
+    status = models.CharField(max_length=255, choices=TEAM_STATUSES, default="registered")
 
     def __str__(self):
         return f"({self.id}) {self.name}"

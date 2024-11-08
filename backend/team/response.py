@@ -7,8 +7,8 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
+from api.models import Team, School, ProgrammingLanguage, Category, Notification
 from authenticate import wrappers
-from api.models import Team, School, ProgrammingLanguage, Category, Notification, UserData
 
 
 @login_required
