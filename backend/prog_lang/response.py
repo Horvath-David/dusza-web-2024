@@ -1,6 +1,7 @@
 import json
 from json import JSONDecodeError
 
+import django.db
 from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 from django.forms import model_to_dict
@@ -33,7 +34,14 @@ def create_lang(request: WSGIRequest):
             "status": "Error",
             "error": "Invalid request body",
         }, status=400)
-    ProgrammingLanguage.objects.create(name=body["name"])
+    try:
+        ProgrammingLanguage.objects.create(name=body["name"])
+    except django.db.IntegrityError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Unique constraint failed",
+        }, status=400)
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
