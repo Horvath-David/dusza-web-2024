@@ -1,5 +1,6 @@
 from json import JSONDecodeError
 
+from django.contrib.auth.models import User
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -49,10 +50,43 @@ def logout(request: WSGIRequest):
 
 @require_http_methods(["POST"])
 def register(request: WSGIRequest):
+    request.session.clear_expired()
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Not implemented",
-        }, status=501)
+            "error": "Invalid request body",
+        }, status=400)
+    if User.objects.filter(username=data["username"]).exists():
+        return JsonResponse({
+            "status": "Error",
+            "error": "User with this username already exists",
+        }, status=400)
+    for i in ["username", "password", "last_name", "first_name"]:
+        if i not in data.keys():
+            return JsonResponse({
+                "status": "Error",
+                "error": "One or more fields are missing",
+            }, status=400)
+
+    user = User.objects.create(
+        username=data["username"],
+        password=data["password"],
+        first_name=data["first_name"],
+        last_name=data["last_name"]
+    )
+    UserData.objects.create(
+        user=user,
+        role="contestant",
+        grade=data["grade"] if "grade" in data.keys() else None,
+    )
+    user.save()
+    auth_login(request, user)
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+    }, status=200)
 
 
 def not_logged_in(request: WSGIRequest):

@@ -80,6 +80,7 @@ def user_info(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "user_name": request.user.username,
         "user_data": model_to_dict(UserData.objects.get(user=request.user)),
         "notifications": [model_to_dict(i) for i in Notification.objects.filter(recipient=request.user)]
     }, status=200)
