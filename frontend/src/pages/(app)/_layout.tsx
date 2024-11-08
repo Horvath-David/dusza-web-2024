@@ -14,7 +14,9 @@ const AppLayout: Component<{}> = (props: ParentProps) => {
           <aside class="basis-64 border-r bg-black">
             <Sidebar />
           </aside>
-          <main class="flex-1 p-6">{props.children}</main>
+          <main class="max-h-screen flex-1 overflow-y-scroll p-6">
+            {props.children}
+          </main>
         </div>
       </Show>
 

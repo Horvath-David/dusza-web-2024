@@ -24,7 +24,7 @@ export const UserProvider = (props: ParentProps) => {
       error: string;
       user_data: UserData;
     }>({
-      endpoint: "/me",
+      endpoint: "/me/",
     });
     if (!res.ok && !loc.pathname.startsWith("/auth")) {
       navigate("/auth/login");
