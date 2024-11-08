@@ -1,10 +1,10 @@
 import { toast } from "solid-sonner";
 
-export const API_URL = "http://localhost:8000";
+export const API_URL = "http://localhost:8000/api";
 
 export interface APIRequest {
   endpoint: string;
-  method?: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
   query?: Record<string, any>;
   headers?: Record<string, string>;
   body?: any;
@@ -67,10 +67,12 @@ async function doRequest(params: APIRequest): Promise<APIResponse> {
   return resp;
 }
 
-export async function makeRequest(params: APIRequest): Promise<APIResponse> {
+export async function makeRequest<T = any>(
+  params: APIRequest,
+): Promise<APIResponse<T>> {
   const resp = await doRequest(params);
   if (resp.data?.error) {
-    toast.error("Error occurred!", { description: resp.data.error });
+    toast.error("Hiba történt!", { description: resp.data.error });
   }
   return resp;
 }

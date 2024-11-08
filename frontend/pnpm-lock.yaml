@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@generouted/solid-router':
+        specifier: ^1.19.9
+        version: 1.19.9(@solidjs/router@0.15.1(solid-js@1.9.3))(solid-js@1.9.3)(vite@5.4.10(@types/node@22.9.0))
       '@kobalte/core':
         specifier: ^0.13.7
         version: 0.13.7(solid-js@1.9.3)
@@ -302,6 +305,13 @@ packages:
 
   '@floating-ui/utils@0.2.8':
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
+
+  '@generouted/solid-router@1.19.9':
+    resolution: {integrity: sha512-Z3HiUEAnbLWnKyflzNPsG2FddnqlqmjM9rnYCWKoUir0WYHd4Gyr3aeKBuXiiXkb9OPaq1RAudOX0ed8JyeE/w==}
+    peerDependencies:
+      '@solidjs/router': '>=0.8'
+      solid-js: '>=1'
+      vite: '>=3'
 
   '@internationalized/date@3.5.6':
     resolution: {integrity: sha512-jLxQjefH9VI5P9UQuqB6qNKnvFt1Ky1TPIzHGsIlCi7sZZoMR8SdYbBGRvM0y+Jtb+ez4ieBzmiAUcpmPYpyOw==}
@@ -703,6 +713,11 @@ packages:
 
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
+
+  generouted@1.19.9:
+    resolution: {integrity: sha512-nnpp35nTcXqTAfk2hlr96w2F1CSDKDR1/oY1NMRSw1wA/K5znaLUXh/2FerZRAYe0zfR6KngREHSX9a4vNMTHA==}
+    peerDependencies:
+      vite: '>=3'
 
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -1414,6 +1429,14 @@ snapshots:
 
   '@floating-ui/utils@0.2.8': {}
 
+  '@generouted/solid-router@1.19.9(@solidjs/router@0.15.1(solid-js@1.9.3))(solid-js@1.9.3)(vite@5.4.10(@types/node@22.9.0))':
+    dependencies:
+      '@solidjs/router': 0.15.1(solid-js@1.9.3)
+      fast-glob: 3.3.2
+      generouted: 1.19.9(vite@5.4.10(@types/node@22.9.0))
+      solid-js: 1.9.3
+      vite: 5.4.10(@types/node@22.9.0)
+
   '@internationalized/date@3.5.6':
     dependencies:
       '@swc/helpers': 0.5.13
@@ -1814,6 +1837,10 @@ snapshots:
     optional: true
 
   function-bind@1.1.2: {}
+
+  generouted@1.19.9(vite@5.4.10(@types/node@22.9.0)):
+    dependencies:
+      vite: 5.4.10(@types/node@22.9.0)
 
   gensync@1.0.0-beta.2: {}
 
