@@ -80,5 +80,5 @@ def user_info(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "user_data": [django_model_operations.model_to_dict(UserData.objects.get(user=request.user))],
+        "user_data": django_model_operations.model_to_dict(UserData.objects.get(user=request.user)),
     }, status=200)

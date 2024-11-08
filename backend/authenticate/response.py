@@ -2,11 +2,10 @@ from json import JSONDecodeError
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods, require_GET
+from django.views.decorators.http import require_http_methods
 from django.core.handlers.wsgi import WSGIRequest
 import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib.auth.decorators import login_required
 
 from api.models import UserData
 

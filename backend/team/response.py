@@ -8,11 +8,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
 from authenticate import wrappers
-from api.models import Team, School, ProgrammingLanguage, Category
+from api.models import Team, School, ProgrammingLanguage, Category, Notification, UserData
 
 
-@require_POST
 @login_required
+@require_POST
 @wrappers.require_role(["contestant"])
 def create_team(request: WSGIRequest):
     try:
@@ -65,8 +65,8 @@ def create_team(request: WSGIRequest):
     }, status=200)
 
 
-@require_http_methods(["POST", "DELETE"])
 @login_required
+@require_http_methods(["PATCH", "DELETE"])
 @wrappers.require_role(["contestant"])
 def edit_team(request: WSGIRequest, team_id):
     if Team.objects.get(id=team_id).owner != request.user:
@@ -74,6 +74,8 @@ def edit_team(request: WSGIRequest, team_id):
             "status": "Error",
             "error": "You are not the owner of this object",
         }, status=403)
+
+    Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).delete()
 
     if request.method == "DELETE":
         if not Team.objects.filter(id=team_id).exists():
@@ -118,5 +120,32 @@ def all_team(request: WSGIRequest):
         "status": "Ok",
         "error": None,
         "list": [model_to_dict(i) for i in Team.objects.all()]
+    }, status=200)
+
+
+@login_required
+@require_POST
+@wrappers.require_role(["organizer"])
+def request_info_fix(request: WSGIRequest, team_id):
+    team_obj = Team.objects.get(id=team_id)
+    user_obj = UserData.objects.get(user=request.user)
+    notification_obj = Notification.objects.create(
+        title="Hiánypótlási kérés",
+        text=f"Kedves {request.user.first_name}! "
+             f"\nAz egyik szervező hiánypótlási kérést küldött, mert úgy véli, hogy hiányos vagy pontatlan adatokat "
+             f"adtál meg a(z) {team_obj.name} csapatod regisztrálásakor. Kérlek, miharabb javítsd a hibát! "
+             f"\nÜdvözlettel,"
+             f"\nDusza panel",
+        delete_on_modify={
+            "name": "team",
+            "id": team_id
+        }
+    )
+
+    user_obj.notifications.add(notification_obj)
+
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
     }, status=200)
 
