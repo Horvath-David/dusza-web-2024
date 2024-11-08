@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount } from "solid-js";
+import { Component, createEffect, createSignal, onMount} from "solid-js";
 import {
   TextField,
   TextFieldLabel,
@@ -10,13 +10,15 @@ import { Button } from "~/components/ui/button.tsx";
 
 import { Combobox } from "@kobalte/core/combobox";
 import { makeRequest } from "~/lib/api";
-import { ProgrammingLanguage } from "~/lib/models";
+import { Category, ProgrammingLanguage, School } from "~/lib/models";
+// import { create } from "domain";
+import { createStore } from "solid-js/store";
 
 const ALL_SHOOL = ["Mechwart", "Fazekas", "TÁG"];
 
-const ALL_CATEGORY = ["Info", "Web", "Hálózat"];
+// const ALL_CATEGORY = ["Info", "Web", "Hálózat"];
 
-const ALL_PROGRAMMING_LANGS = ["Python", "Java", "C#"];
+// const ALL_PROGRAMMING_LANGS = ["Python", "Java", "C#"];
 
 async function getProgLangs() {
   const res = await makeRequest<{
@@ -28,6 +30,30 @@ async function getProgLangs() {
   });
   return res.data;
 }
+
+async function getCategory() {
+  const res = await makeRequest<{
+    status: string;
+    error?: string;
+    list: Category[];
+  }>({
+    endpoint: "/category/all",
+  });
+  return res.data;
+}
+
+async function getSchool() {
+  const res = await makeRequest<{
+    status: string;
+    error?: string;
+    list: School[];
+  }>({
+    endpoint: "/school/all",
+  });
+  return res.data;
+}
+
+
 
 const NewTeam: Component<{}> = (props) => {
   const [teamName, setTeamName] = createSignal("");
@@ -41,12 +67,40 @@ const NewTeam: Component<{}> = (props) => {
   const [substituteTeamMateName, setSubstitudeTeamMateName] = createSignal("");
   const [substituteTeamMateGrade, setSubstitudeTeamMateGrade] = createSignal(0);
 
+
+  const [allProgLang, setAllProgLang] = createStore([""]);
+  const [allCategory, setAllCategory] = createStore([""]);
+  const [allSchool, setAllSchool] = createStore([""]);
+
+  const [allProgLangObj, setAllProgLangObj] = createStore([{}]);
+  const [allCategoryObj, setAllCategoryObj] = createStore([{}]);
+  const [allSchoolObj, setAllSchoolObj] = createStore([{}]);
+
   const [teacher, setTeacher] = createSignal("");
 
   onMount(async () => {
-    const res = await getProgLangs();
-    console.log(res);
+    const resProg = await getProgLangs();
+    resProg?.list.forEach(element => {
+      setAllProgLang([...allProgLang, element.name]);
+      setAllProgLangObj([...allProgLangObj, {"id": element.id, "name": element.name}])
+    });
+
+    const resCat = await getCategory();
+    resCat?.list.forEach(element => {
+      setAllCategory([...allCategory, element.name])
+      setAllCategoryObj([...allCategoryObj, {"id": element.id, "name": element.name}])
+    });
+    
+    const resSch = await getSchool();
+    resSch?.list.forEach(element => {
+      setAllSchool([...allSchool, element.name])
+      setAllSchoolObj([...allSchoolObj, {"id": element.id, "name": element.name}])
+    });
   });
+
+  // createEffect(()=> {
+  //   // console.log(allProgLangObj.find(x => x.name === programmingLang()))
+  // })
 
   const [school, setSchool] = createSignal("");
   const [category, setCategory] = createSignal("");
@@ -126,7 +180,7 @@ const NewTeam: Component<{}> = (props) => {
         </TextField>
 
         <Combobox
-          options={ALL_SHOOL}
+          options={allSchool}
           placeholder="Válassz egy iskolát"
           itemComponent={(props) => (
             <Combobox.Item
@@ -159,7 +213,7 @@ const NewTeam: Component<{}> = (props) => {
         <br />
 
         <Combobox
-          options={ALL_CATEGORY}
+          options={allCategory}
           placeholder="Válassz egy kategóriát"
           itemComponent={(props) => (
             <Combobox.Item
@@ -193,7 +247,7 @@ const NewTeam: Component<{}> = (props) => {
         <br />
 
         <Combobox
-          options={ALL_PROGRAMMING_LANGS}
+          options={allProgLang}
           placeholder="Válassz egy programnyelvet"
           itemComponent={(props) => (
             <Combobox.Item
@@ -226,6 +280,8 @@ const NewTeam: Component<{}> = (props) => {
 
         <br />
         <Button>Beadás</Button>
+
+        {/* <p>{console.log(allProgLangObj)}</p> */}
       </div>
     </>
   );
