@@ -49,10 +49,7 @@ export const Login: Component<{}> = () => {
     <>
       <h1 class="mb-4 text-2xl font-semibold">DuszaPanel - Bejelentkezés</h1>
 
-      <TextField
-        onChange={(val) => setUsername(val)}
-        class="grid w-full max-w-xs items-center gap-1.5"
-      >
+      <TextField onChange={(val) => setUsername(val)}>
         <TextFieldLabel for="username">Felhasználónév</TextFieldLabel>
         <TextFieldInput
           value={username()}
@@ -62,10 +59,7 @@ export const Login: Component<{}> = () => {
         />
       </TextField>
 
-      <TextField
-        onChange={(val) => setPassword(val)}
-        class="grid w-full max-w-xs items-center gap-1.5"
-      >
+      <TextField onChange={(val) => setPassword(val)}>
         <TextFieldLabel for="password">Felhasználónév</TextFieldLabel>
         <TextFieldInput
           value={password()}

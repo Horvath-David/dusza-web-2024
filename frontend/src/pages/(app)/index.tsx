@@ -1,18 +1,24 @@
-import { Component } from "solid-js";
-import { Button } from "../components/ui/button";
-import { Checkbox } from "../components/ui/checkbox";
-import { Label } from "../components/ui/label";
+import { Component, onMount } from "solid-js";
+import { Button } from "../../components/ui/button";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Label } from "../../components/ui/label";
 import { toast } from "solid-sonner";
 import { makeRequest } from "~/lib/api";
+import { currentUser } from "~/lib/signals";
 
-const Frame: Component<{}> = () => {
+const Home: Component<{}> = () => {
+  onMount(() => {
+    console.log(currentUser());
+  });
+
   return (
-    <div class="flex h-screen w-full flex-col items-center justify-center gap-6 text-3xl">
+    <div class="flex h-full w-full flex-col items-center justify-center gap-6 text-3xl">
       DuszaWeb 2024
+      {currentUser()?.id}
       <Button
         variant="default"
         onClick={async () => {
-        const res = await makeRequest({
+          const res = await makeRequest({
             endpoint: "/auth/login",
             method: "POST",
             body: {
@@ -42,4 +48,4 @@ const Frame: Component<{}> = () => {
   );
 };
 
-export default Frame;
+export default Home;
