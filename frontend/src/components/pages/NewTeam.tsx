@@ -6,11 +6,21 @@ import { Button } from "../ui/button.tsx";
 
 import { Combobox } from "@kobalte/core/combobox";
 
+const HOST_URL = "http://127.0.0.1:8000"
+
 const ALL_SHOOL = ["Mechwart", "Fazekas", "TÁG"]
 
 const ALL_CATEGORY = ["Info", "Web", "Hálózat"]
 
 const ALL_PROGRAMMING_LANGS = ["Python", "Java", "C#"]
+
+async function getProgLangs() {
+  const res = await fetch(
+    `${HOST_URL}/api/prog_lang/all`
+  );
+  return res.json();
+
+}
 
 
 export const NewTeam: Component<{}> = (props) => {
