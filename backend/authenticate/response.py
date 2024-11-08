@@ -1,10 +1,14 @@
 from json import JSONDecodeError
+
+from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.core.handlers.wsgi import WSGIRequest
 import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
+
+from api.models import UserData
 
 
 # Create your views here.
@@ -16,11 +20,14 @@ def login(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({"error": "Invalid request body"}, status=400)
     user = authenticate(request, username=data["username"], password=data["password"])
-    if user is not None:
+    if user is None:
         return JsonResponse({"error": "Invalid username or password"}, status=403)
 
     auth_login(request, user)
-    return JsonResponse({"status": "Ok"}, status=200)
+    return JsonResponse({
+        "status": "Ok",
+        "user_data": model_to_dict(UserData.objects.get(user=user))
+    }, status=200)
 
 
 
