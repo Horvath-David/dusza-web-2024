@@ -18,15 +18,22 @@ def login(request: WSGIRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return JsonResponse({"error": "Invalid request body"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body",
+        }, status=400)
     user = authenticate(request, username=data["username"], password=data["password"])
     if user is None:
-        return JsonResponse({"error": "Invalid username or password"}, status=403)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid username or password",
+        }, status=403)
 
     auth_login(request, user)
     return JsonResponse({
         "status": "Ok",
-        "user_data": model_to_dict(UserData.objects.get(user=user))
+        "error": None,
+        "user_data": model_to_dict(UserData.objects.get(user=user)),
     }, status=200)
 
 
@@ -35,7 +42,10 @@ def login(request: WSGIRequest):
 def logout(request: WSGIRequest):
     request.session.clear_expired()
     auth_logout(request)
-    return JsonResponse({"status": "Ok"}, status=200)
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+    }, status=200)
 
 
 @require_http_methods(["POST"])
@@ -49,12 +59,18 @@ def change_email(request: WSGIRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return JsonResponse({"error": "Invalid request body"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body",
+        }, status=400)
 
     user = authenticate(request, username=request.user.username, password=data["current_password"])
 
     if user is None:
-        return JsonResponse({"error": "Invalid current password"}, status=401)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid current password",
+        }, status=401)
     request.user.email = data["email"]
     request.user.save()
 
@@ -67,13 +83,22 @@ def change_password(request: WSGIRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return JsonResponse({"error": "Invalid request body"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body"
+        }, status=400)
     if not json.loads(request.body)["password"]:
-        return JsonResponse({"error": "Invalid password"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid password",
+        }, status=400)
 
     user = authenticate(request, username=request.user.username, password=data["current_password"])
     if user is None:
-        return JsonResponse({"error": "Invalid current password"}, status=401)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid current password",
+        }, status=401)
 
     request.user.set_password(json.loads(request.body)["password"])
     request.user.save()
