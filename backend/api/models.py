@@ -46,6 +46,7 @@ class Team(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
     members = models.JSONField()
+    supplementary_members = models.JSONField(blank=True, null=True)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     teacher_name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
