@@ -18,3 +18,19 @@ def list_all(request: WSGIRequest):
         "error": None,
         "list": [model_to_dict(i) for i in ProgrammingLanguage.objects.all()]
     })
+
+@login_required
+@wrappers.require_role(["organizer"])
+def create_lang(request: WSGIRequest):
+    try:
+        body = json.loads(request.body)
+    except JSONDecodeError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body",
+        }, status=400)
+    ProgrammingLanguage.objects.create(name=body["name"])
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+    })

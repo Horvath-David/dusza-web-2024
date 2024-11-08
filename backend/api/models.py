@@ -1,4 +1,3 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Model, ManyToManyField
@@ -10,25 +9,28 @@ ROLE_CHOICES = (
     ('school', 'School communicator'),
 )
 
-class Notification(models.Model):
-    title = models.CharField(max_length=255)
-    text = models.TextField()
-    delete_on_modify = models.JSONField()
-
-    def __str__(self):
-        return f"({self.id}) {self.title}"
 
 
 class UserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=255, choices=ROLE_CHOICES)
     grade = models.IntegerField(blank=True, null=True)
-    notifications = ManyToManyField(Notification, blank=True)
     unsuccessful_attempts = models.IntegerField(default=0)
     is_disabled = models.BooleanField(default=False)
 
     def __str__(self):
         return f"({self.id}) {self.user.username} ({self.user.id})'s user data"
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User ,on_delete=models.CASCADE, related_name="recipient")
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+    delete_on_modify = models.JSONField(null=True, blank=True)
+    notify_on_action_taken = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return f"({self.id}) {self.title}"
 
 
 class School(models.Model):

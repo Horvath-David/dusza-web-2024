@@ -75,7 +75,23 @@ def edit_team(request: WSGIRequest, team_id):
             "error": "You are not the owner of this object",
         }, status=403)
 
-    Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).delete()
+    notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
+    for i in notification_obj:
+        Notification.objects.create(
+            recipient=i.notify_on_action_taken,
+            title="Az egyik csapat eleget tett a kérésednek",
+            text=f"Kedves {i.notify_on_action_taken.first_name}! "
+                 f"\nA(z) {Team.objects.get(id=team_id).name} csapat, eleget téve a kérésednek, megváltoztatta az adatait."
+                 f"\nKérlek, ellenőrizd, hogy mostmár minden megfelelő-e!"
+                 f"\nÜdvözlettel,"
+                 f"\nDusza panel",
+            delete_on_modify={
+                "name": "team",
+                "id": team_id
+            },
+            notify_on_action_taken=request.user,
+        )
+        i.delete()
 
     if request.method == "DELETE":
         if not Team.objects.filter(id=team_id).exists():
@@ -127,22 +143,29 @@ def all_team(request: WSGIRequest):
 @require_POST
 @wrappers.require_role(["organizer"])
 def request_info_fix(request: WSGIRequest, team_id):
+    if Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).exists():
+        return JsonResponse({
+            "status": "Already reported as incomplete",
+            "error": None,
+        }, status=304)
+
     team_obj = Team.objects.get(id=team_id)
-    user_obj = UserData.objects.get(user=request.user)
-    notification_obj = Notification.objects.create(
+    Notification.objects.create(
+        recipient=team_obj.owner,
         title="Hiánypótlási kérés",
         text=f"Kedves {request.user.first_name}! "
-             f"\nAz egyik szervező hiánypótlási kérést küldött, mert úgy véli, hogy hiányos vagy pontatlan adatokat "
-             f"adtál meg a(z) {team_obj.name} csapatod regisztrálásakor. Kérlek, miharabb javítsd a hibát! "
+             f"\nAz egyik szervező hiánypótlási kérést küldött neked, mert úgy véli, hogy hiányos, pontatlan vagy "
+             f"nem megfelelő adatokat adtál meg a(z) {team_obj.name} csapatod regisztrálásakor. Kérlek, miharabb "
+             f"javítsd a hibát, mert ez akár a csapatod versenyből való kizárását is jelentheti! "
              f"\nÜdvözlettel,"
              f"\nDusza panel",
         delete_on_modify={
             "name": "team",
             "id": team_id
-        }
+        },
+        notify_on_action_taken=request.user,
     )
 
-    user_obj.notifications.add(notification_obj)
 
     return JsonResponse({
         "status": "Ok",
