@@ -110,11 +110,34 @@ const NewTeam: Component<{}> = () => {
     );
   });
 
+    const handleSubmit =  async(event:SubmitEvent) => {
+    event.preventDefault();
+    // console.log(school()?.value, category()?.value, programmingLang()?.value, teamMateOneName(), teamMateOneGrade().valueOf, teacher().valueOf, teamName().valueOf)
+    const res = await makeRequest({
+      method: "POST",
+      endpoint: "/team/create",
+      body: {
+        "team_name": teamName(),
+        "school_id": school()?.value,
+        "names": [teamMateOneName(), teamMateSecondName(), teamMateThirdName()],
+        "grades": [teamMateOneGrade(), teamMateSecondGrade(), teamMateThirdGrade()],
+        "supplementary_names": [substituteTeamMateName()],
+        "supplementary_grades": [substituteTeamMateGrade()],
+        "teacher_name": teacher(),
+        "category_id": category()?.value,
+        "prog_lang_id": programmingLang()?.value
+      },
+    });
+    console.log(res);
+  }
+
+
   return (
     <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
       <h1 class="my-8 text-2xl font-semibold">Új csapat regisztrálása</h1>
+      <form onSubmit={handleSubmit}>
 
-      <TextField class="max-w-full" value={teamName()} onChange={setTeamName}>
+      <TextField class="max-w-full" value={teamName()} onChange={setTeamName} required>
         <TextFieldLabel>Csapatnév:</TextFieldLabel>
         <TextFieldInput type="text" name="teamNameInput"></TextFieldInput>
       </TextField>
@@ -123,11 +146,11 @@ const NewTeam: Component<{}> = () => {
 
       {/* Teammate #1 */}
       <div class="flex gap-4">
-        <TextField value={teamMateOneName()} onChange={setTeamMateOneName}>
+        <TextField value={teamMateOneName()} onChange={setTeamMateOneName} required>
           <TextFieldLabel>Első csapattag neve: </TextFieldLabel>
           <TextFieldInput type="text" />
         </TextField>
-        <NumberField
+        <NumberField required
           class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
           minValue={8}
           maxValue={13}
@@ -145,14 +168,14 @@ const NewTeam: Component<{}> = () => {
 
       {/* Teammate #2 */}
       <div class="flex gap-4">
-        <TextField
+        <TextField required
           value={teamMateSecondName()}
           onChange={setTeamMateSecondName}
         >
           <TextFieldLabel>Második csapattag neve: </TextFieldLabel>
           <TextFieldInput type="text" />
         </TextField>
-        <NumberField
+        <NumberField required={true}
           class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
           minValue={8}
           maxValue={13}
@@ -170,11 +193,11 @@ const NewTeam: Component<{}> = () => {
 
       {/* Teammate #3 */}
       <div class="flex gap-4">
-        <TextField value={teamMateThirdName()} onChange={setTeamMateThirdName}>
+        <TextField value={teamMateThirdName()} onChange={setTeamMateThirdName} required={true}>
           <TextFieldLabel>Harmadik csapattag neve: </TextFieldLabel>
           <TextFieldInput type="text" />
         </TextField>
-        <NumberField
+        <NumberField required
           class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
           minValue={8}
           maxValue={13}
@@ -217,13 +240,13 @@ const NewTeam: Component<{}> = () => {
 
       <h2 class="mb-4 mt-8 text-xl font-semibold">További adatok: </h2>
 
-      <TextField class="max-w-full" value={teacher()} onChange={setTeacher}>
+      <TextField required class="max-w-full" value={teacher()} onChange={setTeacher}>
         <TextFieldLabel>Felkészítő tanár neve: </TextFieldLabel>
         <TextFieldInput type="text" />
       </TextField>
 
       {/* School selection */}
-      <Combobox<IDOption>
+      <Combobox<IDOption> required
         options={allSchool()}
         optionValue="value"
         optionTextValue="label"
@@ -248,7 +271,7 @@ const NewTeam: Component<{}> = () => {
       </Combobox>
 
       {/* Category selection */}
-      <Combobox<IDOption>
+      <Combobox<IDOption> required
         options={allCategory()}
         optionValue="value"
         optionTextValue="label"
@@ -273,7 +296,7 @@ const NewTeam: Component<{}> = () => {
       </Combobox>
 
       {/* Language selection */}
-      <Combobox<IDOption>
+      <Combobox<IDOption> required
         options={allProgLang()}
         optionValue="value"
         optionTextValue="label"
@@ -297,7 +320,8 @@ const NewTeam: Component<{}> = () => {
         <ComboboxContent />
       </Combobox>
 
-      <Button class="mb-4 mt-6 w-full">Beadás</Button>
+      <Button class="mb-4 mt-6 w-full" type="submit">Beadás</Button>
+     </form>
     </div>
   );
 };
