@@ -8,4 +8,5 @@ urlpatterns = [
     path("logout", response.logout, name="logout"),
     path("profile/change/email", response.change_email, name="change_email"),
     path("profile/change/password", response.change_password, name="change_password"),
+    path("not_logged_in", response.not_logged_in, name="not_logged_in"),
 ]
