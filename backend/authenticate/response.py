@@ -4,9 +4,6 @@ from django.views.decorators.http import require_http_methods
 from django.core.handlers.wsgi import WSGIRequest
 import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.contrib.auth.models import User
-
-from api.models import UserData
 from django.contrib.auth.decorators import login_required
 
 
@@ -14,13 +11,14 @@ from django.contrib.auth.decorators import login_required
 @require_http_methods(["POST"])
 def login(request: WSGIRequest):
     request.session.clear_expired()
-    user = authenticate(request, username=request.POST.get("username"), password=request.POST.get("password"))
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        return JsonResponse({"error": "Invalid request body"}, status=400)
+    user = authenticate(request, username=data["username"], password=data["password"])
     if user is not None:
-        user_data = UserData.objects.get(user=user)
-        auth_login(request, user)
-        user_data.unsuccessful_attempts = 0
-        user_data.save()
         return JsonResponse({"status": "Ok"}, status=200)
+    auth_login(request, user)
 
     return JsonResponse({"error": "Invalid username or password"}, status=403)
 
