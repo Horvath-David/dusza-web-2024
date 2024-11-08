@@ -3,8 +3,9 @@ from json import JSONDecodeError
 
 from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
+from django.forms import model_to_dict
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
 from authenticate import wrappers
 from api.models import Team, School, ProgrammingLanguage, Category
@@ -51,8 +52,8 @@ def create_team(request: WSGIRequest):
         name=body["team_name"],
         owner=request.user,
         school_id=body["school_id"],
-        members=dict(zip(body["names"], body["grades"])),
-        supplementary_members=dict(zip(body["supplementary_names"], body["supplementary_grades"])),
+        members=[{"name": name, "grade": grade} for name, grade in zip(body["names"], body["grades"])],
+        supplementary_members=[{"name": name, "grade": grade} for name, grade in zip(body["supplementary_names"], body["supplementary_grades"])],
         teacher_name=body["teacher_name"],
         category_id=body["category_id"],
         prog_lang_id=body["prog_lang_id"]
@@ -107,3 +108,15 @@ def edit_team(request: WSGIRequest, team_id):
         "status": "Ok",
         "error": None,
     }, status=200)
+
+
+@login_required
+@require_GET
+@wrappers.require_role(["organizer"])
+def all_team(request: WSGIRequest):
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+        "list": [model_to_dict(i) for i in Team.objects.all()]
+    }, status=200)
+

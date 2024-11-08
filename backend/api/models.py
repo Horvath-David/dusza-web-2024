@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Model
+from django.db.models import Model, ManyToManyField
+from django.forms import model_to_dict
 
 # Create your models here.
 ROLE_CHOICES = (
@@ -9,10 +10,21 @@ ROLE_CHOICES = (
     ('school', 'School communicator'),
 )
 
+class Notification(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+    def __str__(self):
+        return f"({self.id}) {self.title}"
+
+    def toJSON(self):
+        return model_to_dict(self)
+
 class UserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=255, choices=ROLE_CHOICES)
     grade = models.IntegerField(blank=True, null=True)
+    notifications = ManyToManyField(Notification, blank=True)
     unsuccessful_attempts = models.IntegerField(default=0)
     is_disabled = models.BooleanField(default=False)
 
