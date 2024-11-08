@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'authenticate.apps.AuthenticateConfig',
     'api.apps.ApiConfig',
     "corsheaders",
-    'team.apps.TeamConfig'
+    'team.apps.TeamConfig',
+    'school.apps.SchoolConfig',
+    'category.apps.CategoryConfig',
+    'prog_lang.apps.ProgLangConfig'
 ]
 
 MIDDLEWARE = [
