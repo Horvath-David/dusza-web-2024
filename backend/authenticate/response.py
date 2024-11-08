@@ -2,7 +2,7 @@ from json import JSONDecodeError
 
 from django.forms import model_to_dict
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_GET
 from django.core.handlers.wsgi import WSGIRequest
 import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
@@ -18,15 +18,22 @@ def login(request: WSGIRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return JsonResponse({"error": "Invalid request body"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body",
+        }, status=400)
     user = authenticate(request, username=data["username"], password=data["password"])
     if user is None:
-        return JsonResponse({"error": "Invalid username or password"}, status=403)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid username or password",
+        }, status=403)
 
     auth_login(request, user)
     return JsonResponse({
         "status": "Ok",
-        "user_data": model_to_dict(UserData.objects.get(user=user))
+        "error": None,
+        "user_data": model_to_dict(UserData.objects.get(user=user)),
     }, status=200)
 
 
@@ -35,12 +42,18 @@ def login(request: WSGIRequest):
 def logout(request: WSGIRequest):
     request.session.clear_expired()
     auth_logout(request)
-    return JsonResponse({"status": "Ok"}, status=200)
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+    }, status=200)
 
 
 @require_http_methods(["POST"])
-def register(request: WSGIRequest, invite_code):
-    ...
+def register(request: WSGIRequest):
+        return JsonResponse({
+            "status": "Error",
+            "error": "Not implemented",
+        }, status=501)
 
 
 @require_http_methods(["POST"])
@@ -49,12 +62,18 @@ def change_email(request: WSGIRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return JsonResponse({"error": "Invalid request body"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body",
+        }, status=400)
 
     user = authenticate(request, username=request.user.username, password=data["current_password"])
 
     if user is None:
-        return JsonResponse({"error": "Invalid current password"}, status=401)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid current password",
+        }, status=401)
     request.user.email = data["email"]
     request.user.save()
 
@@ -67,13 +86,22 @@ def change_password(request: WSGIRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return JsonResponse({"error": "Invalid request body"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body"
+        }, status=400)
     if not json.loads(request.body)["password"]:
-        return JsonResponse({"error": "Invalid password"}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid password",
+        }, status=400)
 
     user = authenticate(request, username=request.user.username, password=data["current_password"])
     if user is None:
-        return JsonResponse({"error": "Invalid current password"}, status=401)
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid current password",
+        }, status=401)
 
     request.user.set_password(json.loads(request.body)["password"])
     request.user.save()
@@ -85,3 +113,14 @@ def not_logged_in(request: WSGIRequest):
         "status": "Error",
         "error": "You are not logged in",
     }, status=401)
+
+
+@login_required
+@require_GET
+def user_info(request: WSGIRequest):
+    user_data_obj = UserData.objects.get(user=request.user)
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+        "user_data": None,
+    }, status=200)

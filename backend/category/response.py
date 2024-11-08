@@ -17,4 +17,26 @@ def list_all(request: WSGIRequest):
         "status": "Ok",
         "error": None,
         "list": [model_to_dict(i) for i in Category.objects.all()]
-    })
+    }, status=200)
+
+
+@login_required
+@wrappers.require_role(["organizer"])
+def create_category(request: WSGIRequest):
+    try:
+        body = json.loads(request.body)
+    except JSONDecodeError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid request body",
+        }, status=400)
+
+    Category.objects.create(
+        name=body["name"]
+    )
+
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+    }, status=200)
+
