@@ -1,4 +1,5 @@
 import json
+from dataclasses import fields
 from datetime import datetime
 from json import JSONDecodeError
 
@@ -227,9 +228,10 @@ def all_team(request: WSGIRequest):
         team_dict = model_to_dict(team)
 
         # Convert foreign keys to dictionaries
-        team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
-        team_dict['category'] = model_to_dict(team.category) if team.category else None
-        team_dict['school'] = model_to_dict(team.school) if team.school else None
+        team_dict['prog_lang'] = model_to_dict(team.prog_lang)
+        team_dict['category'] = model_to_dict(team.category)
+        team_dict['school'] = model_to_dict(team.school)
+        team_dict['school']["communicator"] = {**model_to_dict(team.school.communicator, fields=["id", "username", "email"]), **model_to_dict(UserData.objects.get(user=team.school.communicator), fields=["display_name"])}
 
         teams_list.append(team_dict)
 
@@ -272,9 +274,11 @@ def get_by_status(request: WSGIRequest, status: str):
         team_dict = model_to_dict(team)
 
         # Convert foreign keys to dictionaries
-        team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
-        team_dict['category'] = model_to_dict(team.category) if team.category else None
-        team_dict['school'] = model_to_dict(team.school) if team.school else None
+        team_dict['prog_lang'] = model_to_dict(team.prog_lang)
+        team_dict['category'] = model_to_dict(team.category)
+        team_dict['school'] = model_to_dict(team.school)
+        team_dict['school']["communicator"] = {**model_to_dict(team.school.communicator, fields=["id", "username", "email"]), **model_to_dict(UserData.objects.get(user=team.school.communicator), fields=["display_name"])}
+
 
         teams_list.append(team_dict)
 
