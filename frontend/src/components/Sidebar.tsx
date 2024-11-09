@@ -17,6 +17,7 @@ import {
 } from "solid-icons/fa";
 import { IconTypes } from "solid-icons";
 import { useLocation } from "@solidjs/router";
+import { Branding } from "./Branding";
 
 interface RouteData {
   title?: string;
@@ -134,13 +135,7 @@ export const Sidebar: Component<{}> = () => {
 
   return (
     <div class="flex h-full flex-col gap-4 p-4">
-      {/* Branding */}
-      <div class="flex justify-center gap-2">
-        <div class="aspect-square rounded-lg bg-gradient-to-tr from-purple-700 to-cyan-400 p-1 text-sm font-black">
-          DP
-        </div>
-        <div class="font-bold uppercase [letter-spacing:1.5px]">DuszaPanel</div>
-      </div>
+      <Branding />
 
       <Hr padding="1rem" />
 

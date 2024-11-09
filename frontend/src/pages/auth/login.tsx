@@ -1,6 +1,7 @@
 import { useLocation } from "@solidjs/router";
 import { Component, createSignal, Show } from "solid-js";
 import { toast } from "solid-sonner";
+import { Branding } from "~/components/Branding";
 import { Spinner } from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,7 +21,8 @@ export const Login: Component<{}> = () => {
   const [username, setUsername] = createSignal("");
   const [password, setPassword] = createSignal("");
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: SubmitEvent) => {
+    e.preventDefault();
     setLoading(true);
 
     const res = await makeRequest<{
@@ -47,10 +49,19 @@ export const Login: Component<{}> = () => {
   };
 
   return (
-    <>
-      <h1 class="mb-4 text-2xl font-semibold">DuszaPanel - Bejelentkezés</h1>
+    <form
+      class="flex flex-col items-center gap-4 rounded-2xl"
+      onSubmit={handleSubmit}
+    >
+      <div class="mx-auto mb-4 flex w-fit items-center gap-3 rounded-xl bg-white/5 p-4">
+        <Branding />
+        <div aria-hidden="true" class="h-8 w-[1px] bg-border"></div>
+        <h1 class="text-center font-bold uppercase leading-none [letter-spacing:1.5px]">
+          Bejelentkezés
+        </h1>
+      </div>
 
-      <TextField onChange={(val) => setUsername(val)}>
+      <TextField required onChange={(val) => setUsername(val)}>
         <TextFieldLabel for="username">Felhasználónév</TextFieldLabel>
         <TextFieldInput
           value={username()}
@@ -60,7 +71,7 @@ export const Login: Component<{}> = () => {
         />
       </TextField>
 
-      <TextField onChange={(val) => setPassword(val)}>
+      <TextField required onChange={(val) => setPassword(val)}>
         <TextFieldLabel for="password">Felhasználónév</TextFieldLabel>
         <TextFieldInput
           value={password()}
@@ -71,10 +82,10 @@ export const Login: Component<{}> = () => {
       </TextField>
 
       <Button
+        type="submit"
         variant="default"
         disabled={loading()}
         class="w-full max-w-xs"
-        onClick={handleSubmit}
       >
         <Show when={loading()}>
           <Spinner />
@@ -89,7 +100,7 @@ export const Login: Component<{}> = () => {
       >
         Még nincs fiókod? Regisztráció
       </Button>
-    </>
+    </form>
   );
 };
 

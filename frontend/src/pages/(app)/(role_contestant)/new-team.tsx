@@ -115,222 +115,224 @@ const NewTeam: Component<{}> = () => {
   };
 
   return (
-    <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
+    <form
+      class="mx-auto flex max-w-sm flex-col items-center gap-4"
+      onSubmit={handleSubmit}
+    >
       <h1 class="my-8 text-2xl font-semibold">Új csapat regisztrálása</h1>
-      <form onSubmit={handleSubmit}>
+
+      <TextField
+        class="max-w-full"
+        value={teamName()}
+        onChange={setTeamName}
+        required
+      >
+        <TextFieldLabel>Csapatnév:</TextFieldLabel>
+        <TextFieldInput type="text" name="teamNameInput"></TextFieldInput>
+      </TextField>
+
+      <h2 class="mb-4 mt-8 text-xl font-semibold">Csapattagok: </h2>
+
+      {/* Teammate #1 */}
+      <div class="flex gap-4">
         <TextField
-          class="max-w-full"
-          value={teamName()}
-          onChange={setTeamName}
+          value={teamMateOneName()}
+          onChange={setTeamMateOneName}
           required
         >
-          <TextFieldLabel>Csapatnév:</TextFieldLabel>
-          <TextFieldInput type="text" name="teamNameInput"></TextFieldInput>
-        </TextField>
-
-        <h2 class="mb-4 mt-8 text-xl font-semibold">Csapattagok: </h2>
-
-        {/* Teammate #1 */}
-        <div class="flex gap-4">
-          <TextField
-            value={teamMateOneName()}
-            onChange={setTeamMateOneName}
-            required
-          >
-            <TextFieldLabel>Első csapattag neve: </TextFieldLabel>
-            <TextFieldInput type="text" />
-          </TextField>
-          <NumberField
-            required
-            class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
-            minValue={8}
-            maxValue={13}
-            value={teamMateOneGrade()}
-            onChange={setTeamMateOneGrade}
-          >
-            <NumberFieldLabel>Osztálya:</NumberFieldLabel>
-            <NumberFieldGroup>
-              <NumberFieldInput />
-              <NumberFieldIncrementTrigger />
-              <NumberFieldDecrementTrigger />
-            </NumberFieldGroup>
-          </NumberField>
-        </div>
-
-        {/* Teammate #2 */}
-        <div class="flex gap-4">
-          <TextField
-            required
-            value={teamMateSecondName()}
-            onChange={setTeamMateSecondName}
-          >
-            <TextFieldLabel>Második csapattag neve: </TextFieldLabel>
-            <TextFieldInput type="text" />
-          </TextField>
-          <NumberField
-            required={true}
-            class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
-            minValue={8}
-            maxValue={13}
-            value={teamMateSecondGrade()}
-            onChange={setTeamMateSecondGrade}
-          >
-            <NumberFieldLabel>Osztálya:</NumberFieldLabel>
-            <NumberFieldGroup>
-              <NumberFieldInput />
-              <NumberFieldIncrementTrigger />
-              <NumberFieldDecrementTrigger />
-            </NumberFieldGroup>
-          </NumberField>
-        </div>
-
-        {/* Teammate #3 */}
-        <div class="flex gap-4">
-          <TextField
-            value={teamMateThirdName()}
-            onChange={setTeamMateThirdName}
-            required={true}
-          >
-            <TextFieldLabel>Harmadik csapattag neve: </TextFieldLabel>
-            <TextFieldInput type="text" />
-          </TextField>
-          <NumberField
-            required
-            class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
-            minValue={8}
-            maxValue={13}
-            value={teamMateThirdGrade()}
-            onChange={setTeamMateThirdGrade}
-          >
-            <NumberFieldLabel>Osztálya:</NumberFieldLabel>
-            <NumberFieldGroup>
-              <NumberFieldInput />
-              <NumberFieldIncrementTrigger />
-              <NumberFieldDecrementTrigger />
-            </NumberFieldGroup>
-          </NumberField>
-        </div>
-
-        {/* Substitute teammate */}
-        <div class="flex gap-4">
-          <TextField
-            value={substituteTeamMateName()}
-            onChange={setSubstitudeTeamMateName}
-          >
-            <TextFieldLabel>Pót csapattag neve: </TextFieldLabel>
-            <TextFieldInput type="text" />
-          </TextField>
-          <NumberField
-            class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
-            minValue={8}
-            maxValue={13}
-            value={substituteTeamMateGrade()}
-            onChange={setSubstitudeTeamMateGrade}
-          >
-            <NumberFieldLabel>Osztálya:</NumberFieldLabel>
-            <NumberFieldGroup>
-              <NumberFieldInput />
-              <NumberFieldIncrementTrigger />
-              <NumberFieldDecrementTrigger />
-            </NumberFieldGroup>
-          </NumberField>
-        </div>
-
-        <h2 class="mb-4 mt-8 text-xl font-semibold">További adatok: </h2>
-
-        <TextField
-          required
-          class="max-w-full"
-          value={teacher()}
-          onChange={setTeacher}
-        >
-          <TextFieldLabel>Felkészítő tanár neve: </TextFieldLabel>
+          <TextFieldLabel>Első csapattag neve: </TextFieldLabel>
           <TextFieldInput type="text" />
         </TextField>
-
-        {/* School selection */}
-        <Combobox<School>
+        <NumberField
           required
-          options={allSchool()}
-          optionValue="id"
-          optionTextValue="name"
-          optionLabel="name"
-          placeholder="Válassz iskolát..."
-          class="w-full"
-          value={school()}
-          onChange={(val) => setSchool(val || undefined)}
-          itemComponent={(props) => (
-            <ComboboxItem item={props.item}>
-              <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
-              <ComboboxItemIndicator />
-            </ComboboxItem>
-          )}
+          class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
+          minValue={8}
+          maxValue={13}
+          value={teamMateOneGrade()}
+          onChange={setTeamMateOneGrade}
         >
-          <Label class="mb-1.5 block">Csapat iskolája:</Label>
-          <ComboboxControl>
-            <ComboboxInput />
-            <ComboboxTrigger />
-          </ComboboxControl>
-          <ComboboxContent />
-        </Combobox>
+          <NumberFieldLabel>Osztálya:</NumberFieldLabel>
+          <NumberFieldGroup>
+            <NumberFieldInput />
+            <NumberFieldIncrementTrigger />
+            <NumberFieldDecrementTrigger />
+          </NumberFieldGroup>
+        </NumberField>
+      </div>
 
-        {/* Category selection */}
-        <Combobox<Category>
+      {/* Teammate #2 */}
+      <div class="flex gap-4">
+        <TextField
           required
-          options={allCategory()}
-          optionValue="id"
-          optionTextValue="name"
-          optionLabel="name"
-          placeholder="Válassz kategóriát..."
-          class="w-full"
-          value={category()}
-          onChange={(val) => setCategory(val || undefined)}
-          itemComponent={(props) => (
-            <ComboboxItem item={props.item}>
-              <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
-              <ComboboxItemIndicator />
-            </ComboboxItem>
-          )}
+          value={teamMateSecondName()}
+          onChange={setTeamMateSecondName}
         >
-          <Label class="mb-1.5 block">Csapat kategóriája:</Label>
-          <ComboboxControl>
-            <ComboboxInput />
-            <ComboboxTrigger />
-          </ComboboxControl>
-          <ComboboxContent />
-        </Combobox>
+          <TextFieldLabel>Második csapattag neve: </TextFieldLabel>
+          <TextFieldInput type="text" />
+        </TextField>
+        <NumberField
+          required={true}
+          class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
+          minValue={8}
+          maxValue={13}
+          value={teamMateSecondGrade()}
+          onChange={setTeamMateSecondGrade}
+        >
+          <NumberFieldLabel>Osztálya:</NumberFieldLabel>
+          <NumberFieldGroup>
+            <NumberFieldInput />
+            <NumberFieldIncrementTrigger />
+            <NumberFieldDecrementTrigger />
+          </NumberFieldGroup>
+        </NumberField>
+      </div>
 
-        {/* Language selection */}
-        <Combobox<ProgrammingLanguage>
+      {/* Teammate #3 */}
+      <div class="flex gap-4">
+        <TextField
+          value={teamMateThirdName()}
+          onChange={setTeamMateThirdName}
+          required={true}
+        >
+          <TextFieldLabel>Harmadik csapattag neve: </TextFieldLabel>
+          <TextFieldInput type="text" />
+        </TextField>
+        <NumberField
           required
-          options={allProgLang()}
-          optionValue="id"
-          optionTextValue="name"
-          optionLabel="name"
-          placeholder="Válassz programnyelvet..."
-          class="w-full"
-          value={programmingLang()}
-          onChange={(val) => setProgrammingLang(val || undefined)}
-          itemComponent={(props) => (
-            <ComboboxItem item={props.item}>
-              <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
-              <ComboboxItemIndicator />
-            </ComboboxItem>
-          )}
+          class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
+          minValue={8}
+          maxValue={13}
+          value={teamMateThirdGrade()}
+          onChange={setTeamMateThirdGrade}
         >
-          <Label class="mb-1.5 block">Csapat programnyelve:</Label>
-          <ComboboxControl>
-            <ComboboxInput />
-            <ComboboxTrigger />
-          </ComboboxControl>
-          <ComboboxContent />
-        </Combobox>
+          <NumberFieldLabel>Osztálya:</NumberFieldLabel>
+          <NumberFieldGroup>
+            <NumberFieldInput />
+            <NumberFieldIncrementTrigger />
+            <NumberFieldDecrementTrigger />
+          </NumberFieldGroup>
+        </NumberField>
+      </div>
 
-        <Button class="mb-4 mt-6 w-full" type="submit">
-          Beadás
-        </Button>
-      </form>
-    </div>
+      {/* Substitute teammate */}
+      <div class="flex gap-4">
+        <TextField
+          value={substituteTeamMateName()}
+          onChange={setSubstitudeTeamMateName}
+        >
+          <TextFieldLabel>Pót csapattag neve: </TextFieldLabel>
+          <TextFieldInput type="text" />
+        </TextField>
+        <NumberField
+          class="grid w-full max-w-xs flex-1 basis-24 items-center gap-1.5"
+          minValue={8}
+          maxValue={13}
+          value={substituteTeamMateGrade()}
+          onChange={setSubstitudeTeamMateGrade}
+        >
+          <NumberFieldLabel>Osztálya:</NumberFieldLabel>
+          <NumberFieldGroup>
+            <NumberFieldInput />
+            <NumberFieldIncrementTrigger />
+            <NumberFieldDecrementTrigger />
+          </NumberFieldGroup>
+        </NumberField>
+      </div>
+
+      <h2 class="mb-4 mt-8 text-xl font-semibold">További adatok: </h2>
+
+      <TextField
+        required
+        class="max-w-full"
+        value={teacher()}
+        onChange={setTeacher}
+      >
+        <TextFieldLabel>Felkészítő tanár neve: </TextFieldLabel>
+        <TextFieldInput type="text" />
+      </TextField>
+
+      {/* School selection */}
+      <Combobox<School>
+        required
+        options={allSchool()}
+        optionValue="id"
+        optionTextValue="name"
+        optionLabel="name"
+        placeholder="Válassz iskolát..."
+        class="w-full"
+        value={school()}
+        onChange={(val) => setSchool(val || undefined)}
+        itemComponent={(props) => (
+          <ComboboxItem item={props.item}>
+            <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
+            <ComboboxItemIndicator />
+          </ComboboxItem>
+        )}
+      >
+        <Label class="mb-1.5 block">Csapat iskolája:</Label>
+        <ComboboxControl>
+          <ComboboxInput />
+          <ComboboxTrigger />
+        </ComboboxControl>
+        <ComboboxContent />
+      </Combobox>
+
+      {/* Category selection */}
+      <Combobox<Category>
+        required
+        options={allCategory()}
+        optionValue="id"
+        optionTextValue="name"
+        optionLabel="name"
+        placeholder="Válassz kategóriát..."
+        class="w-full"
+        value={category()}
+        onChange={(val) => setCategory(val || undefined)}
+        itemComponent={(props) => (
+          <ComboboxItem item={props.item}>
+            <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
+            <ComboboxItemIndicator />
+          </ComboboxItem>
+        )}
+      >
+        <Label class="mb-1.5 block">Csapat kategóriája:</Label>
+        <ComboboxControl>
+          <ComboboxInput />
+          <ComboboxTrigger />
+        </ComboboxControl>
+        <ComboboxContent />
+      </Combobox>
+
+      {/* Language selection */}
+      <Combobox<ProgrammingLanguage>
+        required
+        options={allProgLang()}
+        optionValue="id"
+        optionTextValue="name"
+        optionLabel="name"
+        placeholder="Válassz programnyelvet..."
+        class="w-full"
+        value={programmingLang()}
+        onChange={(val) => setProgrammingLang(val || undefined)}
+        itemComponent={(props) => (
+          <ComboboxItem item={props.item}>
+            <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
+            <ComboboxItemIndicator />
+          </ComboboxItem>
+        )}
+      >
+        <Label class="mb-1.5 block">Csapat programnyelve:</Label>
+        <ComboboxControl>
+          <ComboboxInput />
+          <ComboboxTrigger />
+        </ComboboxControl>
+        <ComboboxContent />
+      </Combobox>
+
+      <Button class="mb-4 mt-6 w-full" type="submit">
+        Beadás
+      </Button>
+    </form>
   );
 };
 
