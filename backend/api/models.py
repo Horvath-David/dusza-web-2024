@@ -18,6 +18,7 @@ TEAM_STATUSES = (
 
 class UserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    display_name = models.CharField(max_length=255, unique=False)
     role = models.CharField(max_length=255, choices=ROLE_CHOICES)
     grade = models.IntegerField(blank=True, null=True)
     unsuccessful_attempts = models.IntegerField(default=0)

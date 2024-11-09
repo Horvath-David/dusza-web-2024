@@ -9,6 +9,7 @@ import json
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 
 from api.models import UserData
+from me.utils import get_extended_user_data
 
 
 # Create your views here.
@@ -33,7 +34,7 @@ def login(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "user_data": model_to_dict(UserData.objects.get(user=user)),
+        "user_data": get_extended_user_data(user),
     }, status=200)
 
 

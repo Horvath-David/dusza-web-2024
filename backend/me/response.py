@@ -8,7 +8,8 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
-from api.models import UserData, Notification
+from api.models import Notification
+from me.utils import get_extended_user_data
 from modules import django_model_operations
 
 
@@ -80,8 +81,7 @@ def user_info(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "user_name": request.user.username,
-        "user_data": model_to_dict(UserData.objects.get(user=request.user)),
+        "user_data": get_extended_user_data(request.user),
         "notifications": [model_to_dict(i) for i in Notification.objects.filter(recipient=request.user)]
     }, status=200)
 
