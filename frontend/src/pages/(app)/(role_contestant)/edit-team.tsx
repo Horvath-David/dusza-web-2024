@@ -31,8 +31,6 @@ import { toast } from "solid-sonner";
 import { useNotifications, useUser } from "~/contexts/userContext";
 import { FaSolidFloppyDisk } from "solid-icons/fa";
 import { Callout, CalloutContent, CalloutTitle } from "~/components/ui/callout";
-import { R } from "node_modules/@kobalte/core/dist/index-f15c7ba5";
-import { P } from "node_modules/@kobalte/core/dist/popper-root-4f4dc506";
 
 
 async function getProgLangs() {
