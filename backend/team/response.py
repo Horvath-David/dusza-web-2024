@@ -88,9 +88,10 @@ def create_team(request: WSGIRequest):
 
 @login_required
 @require_http_methods(["PATCH", "DELETE"])
-@wrappers.require_role(["contestant"])
+@wrappers.require_role(["contestant", "organizer"])
 def edit_team(request: WSGIRequest, team_id):
-    if Team.objects.get(id=team_id).owner != request.user:
+    user_object = UserData.objects.get(user=request.user)
+    if Team.objects.get(id=team_id).owner != request.user and user_object.role != "organizer":
         return JsonResponse({
             "status": "Error",
             "error": "You are not the owner of this team",
@@ -104,22 +105,24 @@ def edit_team(request: WSGIRequest, team_id):
             }, status=404)
         notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
         for i in notification_obj:
-            user_data = UserData.objects.get(user=i.notify_on_action_taken)
-            Notification.objects.create(
-                recipient=i.notify_on_action_taken,
-                title="Az egyik csapat visszavonta a nevezését",
-                text=f"Kedves {user_data.display_name}! "
-                     f"\nA(z) {Team.objects.get(id=team_id).name} csapat, az adatainak a módósítása helyett, visszavonta"
-                     f"\n a nevezését."
-                     f"\nÜdvözlettel,"
-                     f"\nDusza panel",
-                delete_on_modify={
-                    "name": "team",
-                    "id": team_id
-                },
-                notify_on_action_taken=request.user,
-            )
+            if user_object.role == "contestant":
+                user_data = UserData.objects.get(user=i.notify_on_action_taken)
+                Notification.objects.create(
+                    recipient=i.notify_on_action_taken,
+                    title="Az egyik csapat visszavonta a nevezését",
+                    text=f"Kedves {user_data.display_name}! "
+                         f"\nA(z) {Team.objects.get(id=team_id).name} csapat, az adatainak a módósítása helyett, visszavonta"
+                         f"\n a nevezését."
+                         f"\nÜdvözlettel,"
+                         f"\nDusza panel",
+                    delete_on_modify={
+                        "name": "team",
+                        "id": team_id
+                    },
+                    notify_on_action_taken=request.user,
+                )
             i.delete()
+
 
         Team.objects.get(id=team_id).delete()
 
@@ -127,6 +130,13 @@ def edit_team(request: WSGIRequest, team_id):
             "status": "Ok",
             "error": None,
         }, status=200)
+
+    if user_object.role == "organizer":
+        return JsonResponse({
+            "status": "Ok",
+            "error": "You do not have permission to perform this operation",
+        }, status=403)
+
 
     try:
         body = json.loads(request.body)
