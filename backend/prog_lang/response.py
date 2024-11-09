@@ -23,6 +23,7 @@ def list_all(request: WSGIRequest):
         "list": [model_to_dict(i) for i in ProgrammingLanguage.objects.all()]
     })
 
+
 @login_required
 @wrappers.require_role(["organizer"])
 @require_POST
@@ -35,7 +36,7 @@ def create_lang(request: WSGIRequest):
             "error": "Invalid request body",
         }, status=400)
     try:
-        ProgrammingLanguage.objects.create(name=body["name"])
+        prog_lang_obj = ProgrammingLanguage.objects.create(name=body["name"])
     except django.db.IntegrityError:
         return JsonResponse({
             "status": "Error",
@@ -45,7 +46,9 @@ def create_lang(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "created": model_to_dict(prog_lang_obj)
     })
+
 
 @login_required
 @wrappers.require_role(["organizer"])
