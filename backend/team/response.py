@@ -190,20 +190,23 @@ def edit_team(request: WSGIRequest, team_id):
 @require_GET
 @wrappers.require_role(["organizer"])
 def all_team(request: WSGIRequest):
-    team = Team.objects.select_related('prog_lang', 'category', 'school', 'school').all()
+    teams = Team.objects.select_related('prog_lang', 'category', 'school').all()
 
-    # Convert team to dict
-    team_dict = model_to_dict(team)
+    teams_list = []
+    for team in teams:
+        team_dict = model_to_dict(team)
 
-    # Convert foreign keys to dictionaries
-    team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
-    team_dict['category'] = model_to_dict(team.category) if team.category else None
-    team_dict['school'] = model_to_dict(team.school) if team.school else None
+        # Convert foreign keys to dictionaries
+        team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
+        team_dict['category'] = model_to_dict(team.category) if team.category else None
+        team_dict['school'] = model_to_dict(team.school) if team.school else None
+
+        teams_list.append(team_dict)
 
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "team": team_dict,
+        "teams": teams_list,
     }, status=200)
 
 
@@ -253,8 +256,6 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
     team = Team.objects.get(id=team_id)
 
     if (user_data.role == "school" and status != "approved_by_school") \
-            or (user_data.role == "school" and team.status != "approved_by_organizer")\
-            or (user_data.role == "organizer" and team.status != "registered")\
             or (user_data.role == "organizer" and status != "approved_by_organizer"):
         return JsonResponse({
             "status": "Error",
@@ -309,7 +310,7 @@ def request_info_fix(request: WSGIRequest, team_id):
 @require_GET
 @wrappers.require_role(["contestant"])
 def my_team(request: WSGIRequest):
-    team = Team.objects.select_related('prog_lang', 'category', 'school', 'school').get(owner=request.user)
+    team = Team.objects.select_related('prog_lang', 'category', 'school').get(owner=request.user)
 
     # Convert team to dict
     team_dict = model_to_dict(team)
