@@ -241,10 +241,21 @@ def get_by_status(request: WSGIRequest, status: str):
             "error": "You do not have permission to perform this query",
         }, status=403)
 
+
+    team = Team.objects.select_related('prog_lang', 'category', 'school').get(status=status)
+
+    # Convert team to dict
+    team_dict = model_to_dict(team)
+
+    # Convert foreign keys to dictionaries
+    team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
+    team_dict['category'] = model_to_dict(team.category) if team.category else None
+    team_dict['school'] = model_to_dict(team.school) if team.school else None
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "list": [model_to_dict(i) for i in Team.objects.filter(status=status)]
+        "team": team_dict,
     }, status=200)
 
 
