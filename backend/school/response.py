@@ -4,6 +4,7 @@ from json import JSONDecodeError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.handlers.wsgi import WSGIRequest
+from django.db import IntegrityError
 from django.http import JsonResponse
 from authenticate import wrappers
 from api.models import School, UserData
@@ -36,21 +37,43 @@ def create_school(request: WSGIRequest):
             "status": "Error",
             "error": "Invalid request body",
         }, status=400)
-    communicator = User.objects.create(
-        username=body['username'],
-        email=body['email'],
-        password=body['password'],
-    )
-    UserData.objects.create(
-        user=communicator,
-        display_name=body['display_name'],
-        role="communicator",
-    )
-    school = School.objects.create(
-        name=body["school_name"],
-        address=body["address"],
-        communicator=communicator,
-    )
+    try:
+        communicator = User.objects.create(
+            username=body['username'],
+            email=body['email'],
+            password=body['password'],
+        )
+    except IntegrityError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "This user already exists",
+        }, status=400)
+
+    try:
+        UserData.objects.create(
+            user=communicator,
+            display_name=body['display_name'],
+            role="communicator",
+        )
+    except IntegrityError:
+        communicator.delete()
+        return JsonResponse({
+            "status": "Error",
+            "error": "This user already exists",
+        }, status=400)
+
+    try:
+        school = School.objects.create(
+            name=body["school_name"],
+            address=body["address"],
+            communicator=communicator,
+        )
+    except IntegrityError:
+        communicator.delete()
+        return JsonResponse({
+            "status": "Error",
+            "error": "This school already exists",
+        }, status=400)
 
     communicator.save()
     school.save()
