@@ -12,7 +12,7 @@ export type Path =
   | `/edit-team`
   | `/languages`
   | `/new-team`
-  | `/school-test`
+  | `/school-teams`
   | `/schools`
   | `/teams`;
 

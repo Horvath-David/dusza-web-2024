@@ -48,32 +48,11 @@ async function getTeams() {
 const Teams: Component<{}> = () => {
   const [allTeamInfo, setAllTeamInfo] = createSignal<Team[]>([]);
 
-  const [alerting, setAlerting] = createSignal(false);
-  const [deleting, setDeleting] = createSignal(false);
   const [approving, setApproving] = createSignal(false);
 
   onMount(async () => {
     setAllTeamInfo(await getTeams());
   });
-
-  async function alertTeam(id: number) {
-    setAlerting(true);
-    const res = await makeRequest({
-      method: "POST",
-      endpoint: `/team/${id}/request_info_fix`,
-      noErrorToast: true,
-    });
-    if (res.status === 304) {
-      toast.warning("Már küldtek értesítést ennek a csapatnak");
-    } else if (!res.ok) {
-      toast.error("Hiba történt!", {
-        description: `Ismeretlen hiba (${res.status} ${res.statusText})`,
-      });
-    } else {
-      toast.success("Sikeres üzenet küldés");
-    }
-    setAlerting(false);
-  }
 
   async function approveTeam(id: number) {
     setApproving(true);
@@ -85,22 +64,8 @@ const Teams: Component<{}> = () => {
     if (res.ok) {
       toast.success("Sikeres státusz változtatás");
     }
+    toast.warning("Még nincs kész a feltöltős dolog");
     setApproving(false);
-  }
-
-  async function deleteTeam(id: number) {
-    setDeleting(true);
-    const res = await makeRequest({
-      method: "DELETE",
-      endpoint: `/team/${id}/manage`,
-    });
-    if (res.status === 200) {
-      toast.success("Sikeres törlés");
-      setAllTeamInfo([...allTeamInfo().filter((x) => x.id !== id)]);
-    } else {
-      toast.error("Hiba történt");
-    }
-    setDeleting(false);
   }
 
   return (
@@ -256,37 +221,9 @@ const Teams: Component<{}> = () => {
                           </div>
                         </div>
 
-                        <Hr padding="1.5rem" />
-                        <DialogFooter class="-mx-2 flex-col gap-4">
-                          <div class="flex w-full gap-4">
-                            <Button
-                              variant="warning"
-                              class="flex-1"
-                              onClick={() => {
-                                alertTeam(team.id);
-                              }}
-                              disabled={alerting()}
-                            >
-                              <Show when={!alerting()} fallback={<Spinner />}>
-                                <FaSolidPen />
-                              </Show>
-                              Módosítás kérése
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              class="flex-1"
-                              onClick={() => {
-                                deleteTeam(team.id);
-                              }}
-                              disabled={deleting()}
-                            >
-                              <Show when={!deleting()} fallback={<Spinner />}>
-                                <FaSolidTrashCan />
-                              </Show>
-                              Törlés
-                            </Button>
-                          </div>
-                          <Show when={team.status === "approved_by_school"}>
+                        <Show when={team.status === "registered"}>
+                          <Hr padding="1.5rem" />
+                          <DialogFooter class="-mx-2 flex-col gap-4">
                             <Button
                               variant="default"
                               onClick={() => {
@@ -299,8 +236,8 @@ const Teams: Component<{}> = () => {
                               </Show>
                               Jóváhagyás
                             </Button>
-                          </Show>
-                        </DialogFooter>
+                          </DialogFooter>
+                        </Show>
                       </DialogContent>
                     </Dialog>
                   );

@@ -9,7 +9,6 @@ import { useUser } from "~/contexts/userContext";
 import { Path, useNavigate } from "~/router";
 import { routes } from "@generouted/solid-router";
 import {
-  FaSolidAward,
   FaSolidHouse,
   FaSolidPen,
   FaSolidPlus,
@@ -79,10 +78,10 @@ function getRouteData(path: string): RouteData {
         order: 4,
       };
 
-    case "/asd/school-test":
+    case "/school-teams":
       return {
-        title: "School test",
-        icon: FaSolidAward,
+        title: "Csapatok",
+        icon: AiOutlineTeam,
         order: 1,
       };
 
