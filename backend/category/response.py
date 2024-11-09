@@ -32,7 +32,7 @@ def create_category(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     try:
         cat = Category.objects.create(name=body["name"])
@@ -40,7 +40,7 @@ def create_category(request: WSGIRequest):
     except django.db.IntegrityError:
         return JsonResponse({
             "status": "Error",
-            "error": "Unique constraint failed",
+            "error": "Már létezik ilyen kategória",
         }, status=400)
 
     return JsonResponse({
@@ -57,13 +57,13 @@ def delete_category(request: WSGIRequest, cat_id):
     if not Category.objects.filter(id=cat_id).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "Category with this ID does not exist",
+            "error": "Nem találtam a keresett katekóriát",
         }, status=404)
     lang_obj = Category.objects.get(id=cat_id)
     if Team.objects.filter(category=lang_obj).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "Category is in use",
+            "error": "Nem tudtam kitörölni a kategóriát, mert már van benevezett csapat",
         }, status=400)
     lang_obj.delete()
     return JsonResponse({

@@ -24,7 +24,7 @@ def change_email(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
 
     user = authenticate(request, username=request.user.username, password=data["current_password"])
@@ -32,7 +32,7 @@ def change_email(request: WSGIRequest):
     if user is None:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid current password",
+            "error": "Kérlek írd be helyesen a jelszavadat, hogy megbizonyosodhassak, hogy tényleg te vagy az",
         }, status=401)
     request.user.email = data["email"]
     request.user.save()
@@ -51,19 +51,19 @@ def change_password(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body"
+            "error": "Hibás kérés"
         }, status=400)
     if not json.loads(request.body)["password"]:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid password",
+            "error": "Helytelen jelszó",
         }, status=400)
 
     user = authenticate(request, username=request.user.username, password=data["current_password"])
     if user is None:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid current password",
+            "error": "Kérlek írd be helyesen a jelszavadat, hogy megbizonyosodhassak, hogy tényleg te vagy az",
         }, status=401)
 
     request.user.set_password(json.loads(request.body)["password"])
@@ -92,14 +92,14 @@ def delete_notification(request: WSGIRequest, notification_id):
     if not Notification.objects.filter(id=notification_id).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "This notification does not exists",
+            "error": "Nem találtam a keresett értesítést",
         }, status=404)
 
     notification_obj = Notification.objects.get(id=notification_id)
     if not notification_obj.manual_delete_enabled:
         return JsonResponse({
             "status": "Error",
-            "error": "This notification cannot be deleted",
+            "error": "Ezt az értesítést nem tudom kitörölni, mert eseményhez van rendelve. Teljesítsd a kérést és majd utána én gondoskodok róla",
         }, status=403)
 
     if notification_obj.recipient == request.user:
@@ -111,6 +111,6 @@ def delete_notification(request: WSGIRequest, notification_id):
 
     return JsonResponse({
         "status": "Error",
-        "error": "This is not your notification",
+        "error": "Sajnálom, de nem engedhetem, hogy mások értesítéseit töröld",
     }, status=403)
 

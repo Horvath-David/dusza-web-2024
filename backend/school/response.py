@@ -1,6 +1,6 @@
 import json
 from json import JSONDecodeError
-import modules
+import modules.django_model_operations, modules.name_operations
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -56,7 +56,7 @@ def create_school(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     try:
         communicator = User.objects.create(
@@ -67,7 +67,7 @@ def create_school(request: WSGIRequest):
     except IntegrityError:
         return JsonResponse({
             "status": "Error",
-            "error": "This user already exists",
+            "error": f"Nem tudtam létrehozni ezt a felhasználót, ezért megszakítottam a folyamatot. Kérlek próbáld egy másik felhasználónévvel! Ha nincs ötleted akkor használhatod ezt is: {modules.name_operations.generate_username(body['display_name'])}",
         }, status=400)
 
     try:
@@ -80,7 +80,7 @@ def create_school(request: WSGIRequest):
         communicator.delete()
         return JsonResponse({
             "status": "Error",
-            "error": "Failed to pair user data object to user",
+            "error": "Nem tudtam egymáshoz rendelni a felhasználót a az adatait, ezért megszakítottam a folyamatot. Kérlek próbáld újra",
         }, status=500)
 
     try:
@@ -93,7 +93,7 @@ def create_school(request: WSGIRequest):
         communicator.delete()
         return JsonResponse({
             "status": "Error",
-            "error": "This school already exists",
+            "error": "Már létezik iskola azonos címmel vagy névvel, ezért megszakítottam a folyamatot",
         }, status=400)
 
     communicator.save()
@@ -116,7 +116,7 @@ def manage_school(request: WSGIRequest, school_id):
         if user_data.role == "school" and school.communicator != request.user:
             return JsonResponse({
                 "status": "Error",
-                "error": "You do not have permission to delete this school",
+                "error": "Nincs jogusultségod, hogy eltávolítsd ezt az iskolát",
             }, status=403)
 
         school.communicator.delete()
@@ -131,7 +131,7 @@ def manage_school(request: WSGIRequest, school_id):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
 
     school_obj = School.objects.get(id=school_id)

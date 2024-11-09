@@ -21,7 +21,7 @@ def set_registration_deadline(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body"
+            "error": "Hibás kérés"
         }, status= 400)
 
     if not Config.objects.filter(name="reg_deadline").exists():

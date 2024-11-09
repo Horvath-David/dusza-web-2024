@@ -33,7 +33,7 @@ def create_lang(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     try:
         prog_lang_obj = ProgrammingLanguage.objects.create(name=body["name"])
@@ -41,7 +41,7 @@ def create_lang(request: WSGIRequest):
     except django.db.IntegrityError:
         return JsonResponse({
             "status": "Error",
-            "error": "Unique constraint failed",
+            "error": "Ezt a programozási nyelvet már valaki (nem biztos, hogy te) korábban hozzáadta",
         }, status=400)
 
     return JsonResponse({
@@ -58,13 +58,13 @@ def delete_lang(request: WSGIRequest, lang_id):
     if not ProgrammingLanguage.objects.filter(id=lang_id).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "Programming language with this ID does not exist",
+            "error": "Nem találtam ilyen programozási nyelvet",
         }, status=404)
     lang_obj = ProgrammingLanguage.objects.get(id=lang_id)
     if Team.objects.filter(prog_lang=lang_obj).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "Programming language is in use",
+            "error": "Nem tudtam kitörölni ezt a programozási nyelvet, mert van olyan csapat aki ezt választotta jelentkezéskor",
         }, status=400)
     lang_obj.delete()
     return JsonResponse({

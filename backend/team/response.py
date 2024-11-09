@@ -22,13 +22,13 @@ def create_team(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     try:
         if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
             return JsonResponse({
                 "status": "Error",
-                "error": "Deadline has ended",
+                "error": "Már lejárt a jelentkezési határidő",
             }, status=403)
     except Config.DoesNotExist:
         pass
@@ -40,7 +40,7 @@ def create_team(request: WSGIRequest):
         if i not in required_fields:
             return JsonResponse({
                 "status": "Error",
-                "error": "One or more fields are missing",
+                "error": "Egy vagy több mező hiányos",
             }, status=400)
 
 
@@ -48,25 +48,25 @@ def create_team(request: WSGIRequest):
         or len(body["grades"]) > 3:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
 
     if not School.objects.filter(id=body["school_id"]).exists():
         return JsonResponse({
             "status": "Error",
-            "error": f"School record with ID {body["school_id"]} does not exist",
+            "error": f"Nem találtam az általad megadott iskolát az adatbázisomban",
         }, status=400)
 
     if not ProgrammingLanguage.objects.filter(id=body["prog_lang_id"]).exists():
         return JsonResponse({
             "status": "Error",
-            "error": f"Programming language record with ID {body["prog_lang_id"]} does not exist",
+            "error": f"Nem találtam az általad megadott programozásnyi nyelvet az adatbázisomban",
         }, status=400)
 
     if not Category.objects.filter(id=body["category_id"]).exists():
         return JsonResponse({
             "status": "Error",
-            "error": f"Category record with ID {body["category_id"]} does not exist",
+            "error": f"Nem találtam az általad megadott kategóriát az adatbázisomban",
         }, status=400)
 
     team = Team.objects.create(
@@ -96,7 +96,7 @@ def edit_team(request: WSGIRequest, team_id):
     if Team.objects.get(id=team_id).owner != request.user and user_object.role != "organizer":
         return JsonResponse({
             "status": "Error",
-            "error": "You are not the owner of this team",
+            "error": "Sajnálom, de csak a csapatot regisztráló felhasználó vonhjatja vissza ezt nevezést",
         }, status=403)
 
     if request.method == "DELETE":
@@ -105,7 +105,7 @@ def edit_team(request: WSGIRequest, team_id):
             if not Team.objects.filter(id=team_id).exists():
                 return JsonResponse({
                     "status": "Error",
-                    "error": "Team with provided ID not found",
+                    "error": "Nem találtam ezt a csapatot",
                 }, status=404)
             notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
             user_data = UserData.objects.get(user=notification_obj.notify_on_action_taken)
@@ -150,7 +150,7 @@ def edit_team(request: WSGIRequest, team_id):
     if user_object.role == "organizer":
         return JsonResponse({
             "status": "Ok",
-            "error": "You do not have permission to perform this operation",
+            "error": "Nincs jogusultságod, hogy végrehajtsd ezt a műveletet",
         }, status=403)
 
 
@@ -160,19 +160,19 @@ def edit_team(request: WSGIRequest, team_id):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     if not Team.objects.filter(id=team_id).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "Team with provided ID not found",
+            "error": "Nem találtam a kért csapatot",
         }, status=404)
     try:
         Team.objects.filter(id=team_id).update(**body)
     except IntegrityError:
         return JsonResponse({
             "status": "Error",
-            "error": "One or more constraints failed"
+            "error": "Egy vagy több feltétel nem teljesült"
         }, status=400)
 
     notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
@@ -234,20 +234,20 @@ def get_by_status(request: WSGIRequest, status: str):
     if status not in valid_statuses:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid status",
+            "error": "Hibás kérés",
         }, status=400)
 
     user_data = UserData.objects.get(user=request.user)
     if user_data.role == "school" and status not in ["registered", "approved_by_school"]:
         return JsonResponse({
             "status": "Error",
-            "error": "You do not have permission to perform this query",
+            "error": "Nincs jogusultségod, hogy elvégezd ezt a lekérdezést",
         }, status=403)
 
     if user_data.role == "organizer" and status not in ["approved_by_school", "approved_by_organizer"]:
         return JsonResponse({
             "status": "Error",
-            "error": "You do not have permission to perform this query",
+            "error": "Nincs jogusultségod, hogy elvégezd ezt a lekérdezést",
         }, status=403)
 
 
@@ -279,7 +279,7 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
     if status not in valid_statuses:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid status",
+            "error": "Hibás státusz",
         }, status=400)
 
     user_data = UserData.objects.get(user=request.user)
@@ -289,14 +289,14 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
         if status != "approved_by_school" or team.status != "registered":
             return JsonResponse({
                 "status": "Error",
-                "error": "You do not have permission to perform this operation",
+                "error": "Nincs jogusultségod hogy végrehajtsd ezt a műveletet",
             }, status=403)
 
     if user_data.role == "organizer":
         if status != "approved_by_organizer" or team.status != "approved_by_school":
             return JsonResponse({
                 "status": "Error",
-                "error": "You do not have permission to perform this operation",
+                "error": "Nincs jogusultségod hogy végrehajtsd ezt a műveletet",
             }, status=403)
 
     team.status = status
@@ -314,7 +314,7 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
 def request_info_fix(request: WSGIRequest, team_id):
     if Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).exists():
         return JsonResponse({
-            "status": "Already reported as incomplete",
+            "status": "Ez a csapat már kapott figyelmeztetést. Majd értesíteni fogom az eredeti jelentőt ha reagált a csapat a kérésére",
             "error": None,
         }, status=304)
 

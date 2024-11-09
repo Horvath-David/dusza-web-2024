@@ -21,13 +21,13 @@ def login(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     user = authenticate(request, username=data["username"], password=data["password"])
     if user is None:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid username or password",
+            "error": "Hibás felhasználónév vagy jelszó",
         }, status=403)
 
     auth_login(request, user)
@@ -57,18 +57,18 @@ def register(request: WSGIRequest):
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
-            "error": "Invalid request body",
+            "error": "Hibás kérés",
         }, status=400)
     if User.objects.filter(username=data["username"]).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "User with this username already exists",
+            "error": "Ez a felhasználónév már foglalt",
         }, status=400)
     for i in ["username", "password"]:
         if i not in data.keys():
             return JsonResponse({
                 "status": "Error",
-                "error": "One or more fields are missing",
+                "error": "Egy vagy több mező hiányos",
             }, status=400)
 
     user = User.objects.create(
@@ -93,5 +93,5 @@ def register(request: WSGIRequest):
 def not_logged_in(request: WSGIRequest):
     return JsonResponse({
         "status": "Error",
-        "error": "You are not logged in",
+        "error": "Nem vagy bejelentkezve",
     }, status=401)
