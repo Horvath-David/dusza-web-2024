@@ -1,48 +1,37 @@
 import { Component, createSignal, For, onMount, Show } from "solid-js";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { BsInfoLg, BsPeopleFill } from "solid-icons/bs";
+import { BsPeopleFill } from "solid-icons/bs";
 import {
-  FaSolidHourglassEnd,
-  FaSolidPen,
-  FaSolidPersonChalkboard,
-  FaSolidSchool,
-  FaSolidTrashCan,
-  FaSolidXmark,
+    FaSolidHourglassEnd,
+    FaSolidPen,
+    FaSolidPersonChalkboard,
+    FaSolidSchool,
+    FaSolidTrashCan,
+    FaSolidXmark,
 } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Team } from "~/lib/models";
 import { toast } from "solid-sonner";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription, CardHeader,
+    CardTitle
 } from "~/components/ui/card";
 import { BiRegularCategoryAlt } from "solid-icons/bi";
 import { FiCode } from "solid-icons/fi";
 import { Badge } from "~/components/ui/badge";
 import { Hr } from "~/components/Sidebar";
-import { DialogCloseButton } from "@kobalte/core/src/dialog/dialog-close-button.jsx";
 import { Spinner } from "~/components/Spinner";
 
 async function getTeams() {
