@@ -242,20 +242,23 @@ def get_by_status(request: WSGIRequest, status: str):
         }, status=403)
 
 
-    team = Team.objects.select_related('prog_lang', 'category', 'school').get(status=status)
+    teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(status=status)
 
-    # Convert team to dict
-    team_dict = model_to_dict(team)
+    teams_list = []
+    for team in teams:
+        team_dict = model_to_dict(team)
 
-    # Convert foreign keys to dictionaries
-    team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
-    team_dict['category'] = model_to_dict(team.category) if team.category else None
-    team_dict['school'] = model_to_dict(team.school) if team.school else None
+        # Convert foreign keys to dictionaries
+        team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
+        team_dict['category'] = model_to_dict(team.category) if team.category else None
+        team_dict['school'] = model_to_dict(team.school) if team.school else None
+
+        teams_list.append(team_dict)
 
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "team": team_dict,
+        "teams": teams_list,
     }, status=200)
 
 
