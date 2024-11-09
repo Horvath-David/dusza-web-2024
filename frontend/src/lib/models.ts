@@ -23,3 +23,15 @@ export interface School {
   name: string;
   adress: string;
 }
+
+export interface DetailedShool {
+  id: number;
+  name: string;
+  address: string;
+  communicator: {
+    name:string,
+    username:string,
+    email: string
+  };
+
+}
