@@ -11,10 +11,8 @@ import { Button } from "~/components/ui/button";
 import { BsPeopleFill } from "solid-icons/bs";
 import {
   FaSolidHourglassEnd,
-  FaSolidPen,
   FaSolidPersonChalkboard,
   FaSolidSchool,
-  FaSolidTrashCan,
   FaSolidXmark,
 } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
