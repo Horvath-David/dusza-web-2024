@@ -14,9 +14,19 @@ import {
     TextFieldLabel,
     TextFieldInput,
   } from "~/components/ui/text-field.tsx";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+  } from "~/components/ui/dialog"
 import { FaSolidTrashCan } from 'solid-icons/fa'
 import { makeRequest } from "~/lib/api";
 import { Category, ProgrammingLanguage } from "~/lib/models";
+
+import { DialogCloseButton } from "@kobalte/core/src/dialog/dialog-close-button.jsx";
 
 
 
@@ -55,6 +65,13 @@ const OrganizerView: Component<{}> = () => {
     const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
     const [allCategory, setAllCategory] = createSignal<Category[]>([]);
 
+    const [schoolName, setSchoolName] = createSignal("");
+    const [schoolAddress, setSchoolAddress] = createSignal("");
+    const [communicatorName, setCommunicatorName] = createSignal("");
+    const [schoolUserName, setSchoolUserName] = createSignal("");
+    const [communicatorEmail, setCommunicatorEmail] = createSignal("");
+    const [schoolPassword, setSchoolPassword] = createSignal("");
+
     onMount(async()=> {
         setAllProgLang(await getAllProgLang())
         setAllCategory(await getAllCategory())
@@ -86,7 +103,26 @@ const OrganizerView: Component<{}> = () => {
             },
           });
           setAllCategory([...allCategory(), {id: allCategory().length, name: newCategory()}])
-        }
+    }
+
+    const handleSubmitNewShool = async (event:SubmitEvent) => {
+        event.preventDefault();
+
+        const res = await makeRequest({
+            method: "POST",
+            endpoint: "/school/create",
+            body: {
+              "username": schoolUserName(),
+              "password": schoolPassword(),
+              "school_name": schoolName(),
+              "address": schoolAddress(),
+              "display_name": communicatorName(),
+              "email": communicatorEmail()
+            },
+          });
+          console.log(res)
+    }
+
 
     async function deleteProgLang(id: Number) {
         await makeRequest({
@@ -108,7 +144,7 @@ const OrganizerView: Component<{}> = () => {
         <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
             <h1 class="my-8 text-2xl font-semibold">Adatok Módosítása</h1>
             <div>
-                <h2 class="mb-4 mt-8 text-xl font-semibold">Programozási nyelv</h2>
+                <h2 class="mb-4 mt-8 text-xl font-semibold">Programozási nyelvek</h2>
                 <form onSubmit={handleSubmitNewProgLang}  class="flex items-end gap-4">
                     <TextField onChange={setNewProgLang} value={newProgLang()} required>
                         <TextFieldLabel>Programozási nyelv hozzáadása:</TextFieldLabel>
@@ -130,7 +166,23 @@ const OrganizerView: Component<{}> = () => {
                             {(progLang) => (
                                 <TableRow>
                                 <TableCell>{progLang.name}</TableCell>
-                                <TableCell class="text-right"><Button variant="destructive" onClick={()=>{deleteProgLang(progLang.id);setNewProgLang("")}}><FaSolidTrashCan /></Button></TableCell>
+                                <TableCell class="text-right">
+                                        <Dialog>
+                                            <DialogTrigger  ><Button variant="destructive"><FaSolidTrashCan /></Button></DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Biztos hogy szeretné törölni?</DialogTitle> 
+                                                </DialogHeader>
+
+                                                <DialogFooter>
+                                                    
+                                                    <Button variant="destructive" onClick={()=>{deleteProgLang(progLang.id);setNewProgLang("")}}>Igen</Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                    
+                                        </Dialog>
+
+                                </TableCell>
                                 </TableRow>
                             )}
                             </For>
@@ -161,13 +213,59 @@ const OrganizerView: Component<{}> = () => {
                             {(category) => (
                                 <TableRow>
                                 <TableCell>{category.name}</TableCell>
-                                <TableCell class="text-right"><Button variant="destructive" onClick={()=>{deleteCategory(category.id); setNewCategory("")}}><FaSolidTrashCan /></Button></TableCell>
+                                <TableCell class="text-right">
+                                <Dialog>
+                                            <DialogTrigger  ><Button variant="destructive"><FaSolidTrashCan /></Button></DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Biztos hogy szeretné törölni?</DialogTitle> 
+                                                </DialogHeader>
+
+                                                <DialogFooter>
+                                                    
+                                                    <Button variant="destructive" onClick={()=>{deleteCategory(category.id);setNewCategory("")}}>Igen</Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                    
+                                        </Dialog>
+                                    {/* <Button variant="destructive" onClick={()=>{deleteCategory(category.id); setNewCategory("")}}><FaSolidTrashCan /></Button> */}
+                                    </TableCell>
                                 </TableRow>
                             )}
                             </For>
                     
                     </TableBody>
                 </Table>
+            </div>
+            <div >
+                <h2 class="mb-4 mt-8 text-xl font-semibold">Intézmény hozzáadása</h2>
+                <form class="mx-auto flex max-w-sm flex-col items-center gap-4" onSubmit={handleSubmitNewShool}>
+                    <TextField value={schoolUserName()} onChange={setSchoolUserName} required>
+                        <TextFieldLabel>Intézmény felhasználóneve:</TextFieldLabel>
+                        <TextFieldInput type="text"></TextFieldInput>
+                    </TextField>
+                    <TextField value={schoolPassword()} onChange={setSchoolPassword} required>
+                        <TextFieldLabel>Intézmény jelszava:</TextFieldLabel>
+                        <TextFieldInput type="password"></TextFieldInput>
+                    </TextField>
+                    <TextField value={schoolName()} onChange={setSchoolName} required>
+                        <TextFieldLabel>Intézmény neve:</TextFieldLabel>
+                        <TextFieldInput type="text"></TextFieldInput>
+                    </TextField>
+                    <TextField value={schoolAddress()} onChange={setSchoolAddress} required>
+                        <TextFieldLabel>Intézmény címe:</TextFieldLabel>
+                        <TextFieldInput type="text"></TextFieldInput>
+                    </TextField>
+                    <TextField value={communicatorName()} onChange={setCommunicatorName} required>
+                        <TextFieldLabel>Kapcsolattartó neve:</TextFieldLabel>
+                        <TextFieldInput type="text"></TextFieldInput>
+                    </TextField>
+                    <TextField value={communicatorEmail()} onChange={setCommunicatorEmail} required>
+                        <TextFieldLabel>Kapcsolattartó email címe:</TextFieldLabel>
+                        <TextFieldInput type="email"></TextFieldInput>
+                    </TextField>
+                    <Button class="mb-4 mt-6 w-full" type="submit">Hozzáadás</Button>
+                </form>
             </div>
         </div>
     );
