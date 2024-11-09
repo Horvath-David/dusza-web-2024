@@ -23,6 +23,9 @@ class Config(models.Model):
     modified = models.DateTimeField()
     created = models.DateTimeField(editable=False)
 
+    def __str__(self):
+        return f"({self.id}) {self.name}"
+
     def save(self, *args, **kwargs):
         """ On save, update timestamps """
         if not self.id:

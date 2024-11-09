@@ -24,17 +24,19 @@ def create_team(request: WSGIRequest):
             "status": "Error",
             "error": "Invalid request body",
         }, status=400)
-
-    if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
-        return JsonResponse({
-            "status": "Error",
-            "error": "Deadline has ended",
-        }, status=403)
+    try:
+        if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
+            return JsonResponse({
+                "status": "Error",
+                "error": "Deadline has ended",
+            }, status=403)
+    except Config.DoesNotExist:
+        pass
 
     required_fields = ["supplementary_names", "supplementary_grades", "names", "grades", "school_id", "prog_lang_id",
                        "category_id", "category_id", "team_name", "teacher_name"]
 
-    for i in body.keys:
+    for i in body.keys():
         if i not in required_fields:
             return JsonResponse({
                 "status": "Error",
