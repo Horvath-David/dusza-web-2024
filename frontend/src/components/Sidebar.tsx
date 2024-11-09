@@ -10,8 +10,8 @@ import { Path, useNavigate } from "~/router";
 import { routes } from "@generouted/solid-router";
 import {
   FaSolidAward,
-  FaSolidChessKing,
   FaSolidHouse,
+  FaSolidPen,
   FaSolidPlus,
   FaSolidQuestion,
 } from "solid-icons/fa";
@@ -23,6 +23,7 @@ interface RouteData {
   icon?: IconTypes;
   order?: number;
   path?: string;
+  showWhen?: (data: RouteData) => boolean;
 }
 
 function getRouteData(path: string): RouteData {
@@ -31,13 +32,21 @@ function getRouteData(path: string): RouteData {
       return {
         title: "Csapat hozzáadása",
         icon: FaSolidPlus,
+        showWhen: () => {
+          const user = useUser()!;
+          return !user()?.team_id;
+        },
         order: 1,
       };
-    case "/asdasd":
+    case "/edit-team":
       return {
-        title: "Asd Asd",
-        icon: FaSolidChessKing,
-        order: 2,
+        title: "Csapat szerkesztése",
+        icon: FaSolidPen,
+        showWhen: () => {
+          const user = useUser()!;
+          return !!user()?.team_id;
+        },
+        order: 1,
       };
 
     case "/asd/school-test":
@@ -167,17 +176,23 @@ export const Sidebar: Component<{}> = () => {
                   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))}
               >
                 {(linkData) => (
-                  <Button
-                    variant={
-                      loc.pathname === linkData.path
-                        ? "sidebarPrimary"
-                        : "sidebarLink"
+                  <Show
+                    when={
+                      linkData.showWhen ? linkData.showWhen(linkData) : true
                     }
-                    onClick={() => navigate(linkData.path as Path)}
                   >
-                    {(linkData.icon ?? FaSolidQuestion)({})}
-                    {linkData.title}
-                  </Button>
+                    <Button
+                      variant={
+                        loc.pathname === linkData.path
+                          ? "sidebarPrimary"
+                          : "sidebarLink"
+                      }
+                      onClick={() => navigate(linkData.path as Path)}
+                    >
+                      {(linkData.icon ?? FaSolidQuestion)({})}
+                      {linkData.title}
+                    </Button>
+                  </Show>
                 )}
               </For>
             </Show>
