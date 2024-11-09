@@ -49,6 +49,7 @@ class Notification(models.Model):
     text = models.TextField()
     delete_on_modify = models.JSONField(null=True, blank=True)
     notify_on_action_taken = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    manual_delete_enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return f"({self.id}) {self.title}"

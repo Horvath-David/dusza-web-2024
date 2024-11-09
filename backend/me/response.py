@@ -96,12 +96,19 @@ def delete_notification(request: WSGIRequest, notification_id):
         }, status=404)
 
     notification_obj = Notification.objects.get(id=notification_id)
+    if not notification_obj.manual_delete_enabled:
+        return JsonResponse({
+            "status": "Error",
+            "error": "This notification cannot be deleted",
+        }, status=403)
+
     if notification_obj.recipient == request.user:
         notification_obj.delete()
         return JsonResponse({
             "status": "Ok",
             "error": None,
         }, status=200)
+
     return JsonResponse({
         "status": "Error",
         "error": "This is not your notification",
