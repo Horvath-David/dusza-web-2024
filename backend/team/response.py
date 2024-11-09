@@ -153,7 +153,7 @@ def edit_team(request: WSGIRequest, team_id):
             "error": "Team with provided ID not found",
         }, status=404)
     try:
-        Team.objects.get(id=team_id).update(**body)
+        Team.objects.filter(id=team_id).update(**body)
     except IntegrityError:
         return JsonResponse({
             "status": "Error",
