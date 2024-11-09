@@ -62,21 +62,19 @@ export const Login: Component<{}> = () => {
       </div>
 
       <TextField required onChange={(val) => setUsername(val)}>
-        <TextFieldLabel for="username">Felhasználónév</TextFieldLabel>
+        <TextFieldLabel>Felhasználónév</TextFieldLabel>
         <TextFieldInput
           value={username()}
           type="text"
-          id="username"
-          placeholder="Kovács Lajos"
+          placeholder="kovacs.lajos"
         />
       </TextField>
 
       <TextField required onChange={(val) => setPassword(val)}>
-        <TextFieldLabel for="password">Felhasználónév</TextFieldLabel>
+        <TextFieldLabel>Jelszó</TextFieldLabel>
         <TextFieldInput
           value={password()}
           type="password"
-          id="password"
           placeholder="Jelszó..."
         />
       </TextField>
