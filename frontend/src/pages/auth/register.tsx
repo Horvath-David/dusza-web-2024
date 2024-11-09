@@ -1,4 +1,3 @@
-import { useLocation } from "@solidjs/router";
 import { Component, createSignal, Show } from "solid-js";
 import { toast } from "solid-sonner";
 import { Branding } from "~/components/Branding";
