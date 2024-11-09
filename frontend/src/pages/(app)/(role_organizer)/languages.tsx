@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount } from "solid-js";
+import { Component, createSignal, For, onMount, Show } from "solid-js";
 import { ProgrammingLanguage } from "~/lib/models";
 import {
   Table,
@@ -21,9 +21,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { FaSolidTrashCan } from "solid-icons/fa";
+import {
+  FaSolidCheck,
+  FaSolidPlus,
+  FaSolidTrashCan,
+  FaSolidX,
+  FaSolidXmark,
+} from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Button } from "~/components/ui/button";
+import { Spinner } from "~/components/Spinner";
+import { Hr } from "~/components/Sidebar";
+import { toast } from "solid-sonner";
 
 async function getAllProgLang() {
   const res = await makeRequest<{
@@ -40,11 +49,16 @@ const ProgrammingLangs: Component<{}> = () => {
   const [newProgLang, setNewProgLang] = createSignal("");
   const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
 
+  const [deleting, setDeleting] = createSignal(false);
+  const [adding, setAdding] = createSignal(false);
+
   onMount(async () => {
     setAllProgLang(await getAllProgLang());
   });
+
   const handleSubmitNewProgLang = async (event: SubmitEvent) => {
     event.preventDefault();
+    setAdding(true);
     const res = await makeRequest({
       method: "POST",
       endpoint: "/prog_lang/create",
@@ -52,19 +66,28 @@ const ProgrammingLangs: Component<{}> = () => {
         name: newProgLang(),
       },
     });
-    setAllProgLang([
-      ...allProgLang(),
-      { id: res.data?.created.id, name: newProgLang() },
-    ]);
-    setNewProgLang("");
+    if (res.ok) {
+      setAllProgLang([
+        ...allProgLang(),
+        { id: res.data?.created.id, name: newProgLang() },
+      ]);
+      setNewProgLang("");
+      toast.success("Programnyelv sikeresen hozzáadva!");
+    }
+    setAdding(false);
   };
 
   async function deleteProgLang(id: Number) {
-    await makeRequest({
+    setDeleting(true);
+    const res = await makeRequest({
       method: "DELETE",
       endpoint: `/prog_lang/delete/${id}`,
     });
-    setAllProgLang([...allProgLang().filter((x) => x.id !== id)]);
+    if (res.ok) {
+      setAllProgLang([...allProgLang().filter((x) => x.id !== id)]);
+      toast.success("Sikeres törlés!");
+    }
+    setDeleting(false);
   }
 
   return (
@@ -75,7 +98,12 @@ const ProgrammingLangs: Component<{}> = () => {
           <TextFieldLabel>Programozási nyelv hozzáadása:</TextFieldLabel>
           <TextFieldInput type="text"></TextFieldInput>
         </TextField>
-        <Button type="submit">Hozzáadás</Button>
+        <Button type="submit" disabled={adding()}>
+          <Show when={!adding()} fallback={<Spinner />}>
+            <FaSolidPlus />
+          </Show>
+          Hozzáadás
+        </Button>
       </form>
 
       <Table>
@@ -93,30 +121,64 @@ const ProgrammingLangs: Component<{}> = () => {
               <TableRow>
                 <TableCell>{progLang.name}</TableCell>
                 <TableCell class="text-right">
-                  <Dialog>
-                    <DialogTrigger>
-                      <Button variant="destructive">
-                        <FaSolidTrashCan />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Biztos hogy szeretné törölni?</DialogTitle>
-                      </DialogHeader>
+                  {(() => {
+                    const [open, setOpen] = createSignal(false);
 
-                      <DialogFooter>
-                        <Button
-                          variant="destructive"
-                          onClick={() => {
-                            deleteProgLang(progLang.id);
-                            setNewProgLang("");
-                          }}
-                        >
-                          Igen
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                    return (
+                      <Dialog open={open()} onOpenChange={setOpen}>
+                        <DialogTrigger class="ml-auto">
+                          <Button variant="destructive" size="icon">
+                            <FaSolidTrashCan />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent noDefaultCloseButton={true} class="py-4">
+                          <DialogHeader class="flex-row items-center">
+                            <DialogTitle class="text-xl">
+                              Biztos, hogy szeretné törölni?
+                            </DialogTitle>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              class="-mr-2 ml-auto"
+                              onClick={() => setOpen(false)}
+                            >
+                              <FaSolidXmark
+                                size={20}
+                                class="text-muted-foreground"
+                              />
+                            </Button>
+                          </DialogHeader>
+                          <Hr padding="1.5rem" />
+                          <DialogFooter class="-mx-2 flex-col gap-4">
+                            <div class="flex w-full gap-4">
+                              <Button
+                                variant="secondary"
+                                class="flex-1"
+                                onClick={() => setOpen(false)}
+                              >
+                                <FaSolidX />
+                                Nem
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                class="flex-1"
+                                onClick={() => {
+                                  deleteProgLang(progLang.id);
+                                  setNewProgLang("");
+                                }}
+                                disabled={deleting()}
+                              >
+                                <Show when={!deleting()} fallback={<Spinner />}>
+                                  <FaSolidCheck />
+                                </Show>
+                                Igen
+                              </Button>
+                            </div>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    );
+                  })()}
                 </TableCell>
               </TableRow>
             )}
