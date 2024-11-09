@@ -2,7 +2,6 @@ import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,

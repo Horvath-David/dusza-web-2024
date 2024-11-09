@@ -1,4 +1,5 @@
 import { Component, createSignal, For, onMount } from "solid-js";
+import { ProgrammingLanguage } from "~/lib/models";
 import {
   Table,
   TableBody,
@@ -23,58 +24,55 @@ import {
 import { FaSolidTrashCan } from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Button } from "~/components/ui/button";
-import { Category } from "~/lib/models";
 
-async function getAllCategory() {
+async function getAllProgLang() {
   const res = await makeRequest<{
     status: string;
     error?: string;
-    list: Category[];
+    list: ProgrammingLanguage[];
   }>({
-    endpoint: "/category/all",
+    endpoint: "/prog_lang/all",
   });
   return res.data?.list ?? [];
 }
 
-const Categories: Component<{}> = () => {
-  const [newCategory, setNewCategory] = createSignal("");
-  const [allCategory, setAllCategory] = createSignal<Category[]>([]);
+const ProgrammingLangs: Component<{}> = () => {
+  const [newProgLang, setNewProgLang] = createSignal("");
+  const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
 
   onMount(async () => {
-    setAllCategory(await getAllCategory());
+    setAllProgLang(await getAllProgLang());
   });
-
-  const handleSubmitNewCategory = async (event: SubmitEvent) => {
+  const handleSubmitNewProgLang = async (event: SubmitEvent) => {
     event.preventDefault();
-
     const res = await makeRequest({
       method: "POST",
-      endpoint: "/category/create",
+      endpoint: "/prog_lang/create",
       body: {
-        name: newCategory(),
+        name: newProgLang(),
       },
     });
-    setAllCategory([
-      ...allCategory(),
-      { id: res.data?.created.id, name: newCategory() },
+    setAllProgLang([
+      ...allProgLang(),
+      { id: res.data?.created.id, name: newProgLang() },
     ]);
-    setNewCategory("");
+    setNewProgLang("");
   };
 
-  async function deleteCategory(id: Number) {
+  async function deleteProgLang(id: Number) {
     await makeRequest({
       method: "DELETE",
-      endpoint: `/category/delete/${id}`,
+      endpoint: `/prog_lang/delete/${id}`,
     });
-    setAllCategory([...allCategory().filter((x) => x.id !== id)]);
+    setAllProgLang([...allProgLang().filter((x) => x.id !== id)]);
   }
 
   return (
     <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
-      <h1 class="my-8 text-2xl font-semibold">Kategóriák</h1>
-      <form onSubmit={handleSubmitNewCategory} class="flex items-end gap-4">
-        <TextField onChange={setNewCategory} value={newCategory()} required>
-          <TextFieldLabel>Kategória hozzáadása:</TextFieldLabel>
+      <h1 class="my-8 text-2xl font-semibold">Programozási nyelvek</h1>
+      <form onSubmit={handleSubmitNewProgLang} class="flex items-end gap-4">
+        <TextField onChange={setNewProgLang} value={newProgLang()} required>
+          <TextFieldLabel>Programozási nyelv hozzáadása:</TextFieldLabel>
           <TextFieldInput type="text"></TextFieldInput>
         </TextField>
         <Button type="submit">Hozzáadás</Button>
@@ -83,17 +81,17 @@ const Categories: Component<{}> = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Kategóriák</TableHead>
+            <TableHead>Nyelvek</TableHead>
             <TableHead class="text-right">
               <span class="mr-1.5 inline-block">Törlés</span>
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <For each={allCategory()}>
-            {(category) => (
+          <For each={allProgLang()}>
+            {(progLang) => (
               <TableRow>
-                <TableCell>{category.name}</TableCell>
+                <TableCell>{progLang.name}</TableCell>
                 <TableCell class="text-right">
                   <Dialog>
                     <DialogTrigger>
@@ -110,7 +108,8 @@ const Categories: Component<{}> = () => {
                         <Button
                           variant="destructive"
                           onClick={() => {
-                            deleteCategory(category.id);
+                            deleteProgLang(progLang.id);
+                            setNewProgLang("");
                           }}
                         >
                           Igen
@@ -118,7 +117,6 @@ const Categories: Component<{}> = () => {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                  {/* <Button variant="destructive" onClick={()=>{deleteCategory(category.id); setNewCategory("")}}><FaSolidTrashCan /></Button> */}
                 </TableCell>
               </TableRow>
             )}
@@ -129,4 +127,4 @@ const Categories: Component<{}> = () => {
   );
 };
 
-export default Categories;
+export default ProgrammingLangs;
