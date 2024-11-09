@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from json import JSONDecodeError
 
 from django.contrib.auth.decorators import login_required
@@ -8,7 +9,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
-from api.models import Team, School, ProgrammingLanguage, Category, Notification, TEAM_STATUSES, UserData
+from api.models import Team, School, ProgrammingLanguage, Category, Notification, TEAM_STATUSES, UserData, Config
 from authenticate import wrappers
 
 
@@ -23,6 +24,12 @@ def create_team(request: WSGIRequest):
             "status": "Error",
             "error": "Invalid request body",
         }, status=400)
+
+    if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
+        return JsonResponse({
+            "status": "Error",
+            "error": "Deadline has ended",
+        }, status=403)
 
     if len(body["supplementary_names"]) > 1 or len(body["supplementary_grades"]) > 1 or len(body["names"]) > 3 \
         or len(body["grades"]) > 3:
