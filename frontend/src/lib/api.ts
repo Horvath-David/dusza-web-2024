@@ -61,6 +61,11 @@ async function doRequest(params: APIRequest): Promise<APIResponse> {
       const bodyJson = await resp.json();
       resp.data = bodyJson;
     } catch (e) {
+      if (!params.noErrorToast) {
+        toast.error("Hiba történt!", {
+          description: `Ismeretlen hiba (${resp.status} ${resp.statusText})`,
+        });
+      }
       console.log(e);
     }
   }

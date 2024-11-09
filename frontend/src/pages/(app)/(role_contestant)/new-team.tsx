@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount } from "solid-js";
+import { Component, createSignal, onMount, Show } from "solid-js";
 import {
   TextField,
   TextFieldLabel,
@@ -26,6 +26,9 @@ import {
   NumberFieldLabel,
 } from "~/components/ui/number-field";
 import { Label } from "~/components/ui/label";
+import { toast } from "solid-sonner";
+import { Spinner } from "~/components/Spinner";
+import { useNavigate } from "~/router";
 
 async function getProgLangs() {
   const res = await makeRequest<{
@@ -61,6 +64,8 @@ async function getSchool() {
 }
 
 const NewTeam: Component<{}> = () => {
+  const navigate = useNavigate();
+
   const [teamName, setTeamName] = createSignal("");
 
   const [teamMateOneName, setTeamMateOneName] = createSignal("");
@@ -83,6 +88,8 @@ const NewTeam: Component<{}> = () => {
   const [programmingLang, setProgrammingLang] =
     createSignal<ProgrammingLanguage>();
 
+  const [saving, setSaving] = createSignal(false);
+
   onMount(async () => {
     setAllSchool(await getSchool());
     setAllCategory(await getCategory());
@@ -91,7 +98,22 @@ const NewTeam: Component<{}> = () => {
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
-    // console.log(school()?.value, category()?.value, programmingLang()?.value, teamMateOneName(), teamMateOneGrade().valueOf, teacher().valueOf, teamName().valueOf)
+
+    if (!school()) {
+      toast.error("Hibás iskola!");
+      return;
+    }
+    if (!category()) {
+      toast.error("Hibás kategória!");
+      return;
+    }
+    if (!programmingLang()) {
+      toast.error("Hibás programnyelv!");
+      return;
+    }
+
+    setSaving(true);
+
     const res = await makeRequest({
       method: "POST",
       endpoint: "/team/create",
@@ -111,7 +133,13 @@ const NewTeam: Component<{}> = () => {
         prog_lang_id: programmingLang()?.id,
       },
     });
-    console.log(res);
+
+    if (res.ok) {
+      toast.success("Csapat sikeresen létrehozva!");
+      //TODO: set context user team_id
+      navigate("/edit-team");
+    }
+    setSaving(false);
   };
 
   return (
@@ -329,7 +357,10 @@ const NewTeam: Component<{}> = () => {
         <ComboboxContent />
       </Combobox>
 
-      <Button class="mb-4 mt-6 w-full" type="submit">
+      <Button class="mb-4 mt-6 w-full" type="submit" disabled={saving()}>
+        <Show when={saving()}>
+          <Spinner />
+        </Show>
         Beadás
       </Button>
     </form>
