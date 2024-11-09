@@ -7,7 +7,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
-from api.models import Team, School, ProgrammingLanguage, Category, Notification
+from api.models import Team, School, ProgrammingLanguage, Category, Notification, TEAM_STATUSES, UserData
 from authenticate import wrappers
 
 
@@ -77,10 +77,11 @@ def edit_team(request: WSGIRequest, team_id):
 
     notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
     for i in notification_obj:
+        user_data = UserData.objects.get(user=i.notify_on_action_taken)
         Notification.objects.create(
             recipient=i.notify_on_action_taken,
             title="Az egyik csapat eleget tett a kérésednek",
-            text=f"Kedves {i.notify_on_action_taken.first_name}! "
+            text=f"Kedves {user_data.display_name}! "
                  f"\nA(z) {Team.objects.get(id=team_id).name} csapat, eleget téve a kérésednek, megváltoztatta az adatait."
                  f"\nKérlek, ellenőrizd, hogy mostmár minden megfelelő-e!"
                  f"\nÜdvözlettel,"
@@ -140,6 +141,63 @@ def all_team(request: WSGIRequest):
 
 
 @login_required
+@require_GET
+@wrappers.require_role(["organizer", "school"])
+def get_by_status(request: WSGIRequest, status: str):
+    valid_statuses = [i[0] for i in TEAM_STATUSES]
+    if status not in valid_statuses:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid status",
+        }, status=400)
+
+    user_data = UserData.objects.get(user=request.user)
+    if user_data.role == "school" and status not in ["approved_by_organizer", "approved_by_school"]:
+        return JsonResponse({
+            "status": "Error",
+            "error": "You do not have permission to perform this query",
+        }, status=403)
+
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+        "list": [model_to_dict(i) for i in Team.objects.filter(status=status)]
+    }, status=200)
+
+
+@login_required
+@require_GET
+@wrappers.require_role(["organizer", "school"])
+def change_status(request: WSGIRequest, status: str, team_id: int):
+    valid_statuses = [i[0] for i in TEAM_STATUSES]
+    if status not in valid_statuses:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Invalid status",
+        }, status=400)
+
+    user_data = UserData.objects.get(user=request.user)
+    team = Team.objects.get(id=team_id)
+
+    if (user_data.role == "school" and status != "approved_by_school") \
+            or (user_data.role == "school" and team.status != "approved_by_organizer")\
+            or (user_data.role == "organizer" and team.status != "registered")\
+            or (user_data.role == "organizer" and status != "approved_by_organizer"):
+        return JsonResponse({
+            "status": "Error",
+            "error": "You do not have permission to perform this operation",
+        }, status=403)
+
+    team.status = status
+    team.save()
+
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+    }, status=200)
+
+
+@login_required
 @require_POST
 @wrappers.require_role(["organizer"])
 def request_info_fix(request: WSGIRequest, team_id):
@@ -150,10 +208,11 @@ def request_info_fix(request: WSGIRequest, team_id):
         }, status=304)
 
     team_obj = Team.objects.get(id=team_id)
+    user_data = UserData.objects.get(user=team_obj.owner)
     Notification.objects.create(
         recipient=team_obj.owner,
         title="Hiánypótlási kérés",
-        text=f"Kedves {request.user.first_name}! "
+        text=f"Kedves {user_data.display_name}! "
              f"\nAz egyik szervező hiánypótlási kérést küldött neked, mert úgy véli, hogy hiányos, pontatlan vagy "
              f"nem megfelelő adatokat adtál meg a(z) {team_obj.name} csapatod regisztrálásakor. Kérlek, miharabb "
              f"javítsd a hibát, mert ez akár a csapatod versenyből való kizárását is jelentheti! "
@@ -164,8 +223,8 @@ def request_info_fix(request: WSGIRequest, team_id):
             "id": team_id
         },
         notify_on_action_taken=request.user,
+        manual_delete_enabled=False
     )
-
 
     return JsonResponse({
         "status": "Ok",
