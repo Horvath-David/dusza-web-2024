@@ -35,18 +35,20 @@ def create_category(request: WSGIRequest):
             "error": "Invalid request body",
         }, status=400)
     try:
-        Category.objects.create(name=body["name"])
+        cat = Category.objects.create(name=body["name"])
+        cat.save()
     except django.db.IntegrityError:
         return JsonResponse({
             "status": "Error",
             "error": "Unique constraint failed",
         }, status=400)
 
-
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "created": model_to_dict(cat),
     }, status=200)
+
 
 @login_required
 @wrappers.require_role(["organizer"])

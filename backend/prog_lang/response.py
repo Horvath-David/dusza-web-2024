@@ -37,6 +37,7 @@ def create_lang(request: WSGIRequest):
         }, status=400)
     try:
         prog_lang_obj = ProgrammingLanguage.objects.create(name=body["name"])
+        prog_lang_obj.save()
     except django.db.IntegrityError:
         return JsonResponse({
             "status": "Error",
@@ -46,7 +47,7 @@ def create_lang(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "created": model_to_dict(prog_lang_obj)
+        "created": model_to_dict(prog_lang_obj),
     })
 
 

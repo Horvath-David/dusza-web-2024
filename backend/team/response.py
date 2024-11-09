@@ -3,6 +3,7 @@ from json import JSONDecodeError
 
 from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
+from django.db import IntegrityError
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
@@ -48,7 +49,7 @@ def create_team(request: WSGIRequest):
             "error": f"Category record with ID {body["category_id"]} does not exist",
         }, status=400)
 
-    Team.objects.create(
+    team = Team.objects.create(
         name=body["team_name"],
         owner=request.user,
         school_id=body["school_id"],
@@ -58,10 +59,12 @@ def create_team(request: WSGIRequest):
         category_id=body["category_id"],
         prog_lang_id=body["prog_lang_id"]
     )
+    team.save()
 
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "created": model_to_dict(team),
     }, status=200)
 
 
@@ -72,27 +75,8 @@ def edit_team(request: WSGIRequest, team_id):
     if Team.objects.get(id=team_id).owner != request.user:
         return JsonResponse({
             "status": "Error",
-            "error": "You are not the owner of this object",
+            "error": "You are not the owner of this team",
         }, status=403)
-
-    notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
-    for i in notification_obj:
-        user_data = UserData.objects.get(user=i.notify_on_action_taken)
-        Notification.objects.create(
-            recipient=i.notify_on_action_taken,
-            title="Az egyik csapat eleget tett a kérésednek",
-            text=f"Kedves {user_data.display_name}! "
-                 f"\nA(z) {Team.objects.get(id=team_id).name} csapat, eleget téve a kérésednek, megváltoztatta az adatait."
-                 f"\nKérlek, ellenőrizd, hogy mostmár minden megfelelő-e!"
-                 f"\nÜdvözlettel,"
-                 f"\nDusza panel",
-            delete_on_modify={
-                "name": "team",
-                "id": team_id
-            },
-            notify_on_action_taken=request.user,
-        )
-        i.delete()
 
     if request.method == "DELETE":
         if not Team.objects.filter(id=team_id).exists():
@@ -100,6 +84,24 @@ def edit_team(request: WSGIRequest, team_id):
                 "status": "Error",
                 "error": "Team with provided ID not found",
             }, status=404)
+        notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
+        for i in notification_obj:
+            user_data = UserData.objects.get(user=i.notify_on_action_taken)
+            Notification.objects.create(
+                recipient=i.notify_on_action_taken,
+                title="Az egyik csapat visszavonta a nevezését",
+                text=f"Kedves {user_data.display_name}! "
+                     f"\nA(z) {Team.objects.get(id=team_id).name} csapat, az adatainak a módósítása helyett, visszavonta"
+                     f"\n a nevezését."
+                     f"\nÜdvözlettel,"
+                     f"\nDusza panel",
+                delete_on_modify={
+                    "name": "team",
+                    "id": team_id
+                },
+                notify_on_action_taken=request.user,
+            )
+            i.delete()
 
         Team.objects.get(id=team_id).delete()
 
@@ -120,8 +122,32 @@ def edit_team(request: WSGIRequest, team_id):
             "status": "Error",
             "error": "Team with provided ID not found",
         }, status=404)
+    try:
+        Team.objects.update(id=team_id, **body)
+    except IntegrityError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "One or more constraints failed"
+        }, status=400)
 
-    Team.objects.update(id=team_id, **body)
+    notification_obj = Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id)
+    for i in notification_obj:
+        user_data = UserData.objects.get(user=i.notify_on_action_taken)
+        Notification.objects.create(
+            recipient=i.notify_on_action_taken,
+            title="Az egyik csapat eleget tett a kérésednek",
+            text=f"Kedves {user_data.display_name}! "
+                 f"\nA(z) {Team.objects.get(id=team_id).name} csapat, eleget téve a kérésednek, megváltoztatta az adatait."
+                 f"\nKérlek, ellenőrizd, hogy mostmár minden megfelelő-e!"
+                 f"\nÜdvözlettel,"
+                 f"\nDusza panel",
+            delete_on_modify={
+                "name": "team",
+                "id": team_id
+            },
+            notify_on_action_taken=request.user,
+        )
+        i.delete()
 
     return JsonResponse({
         "status": "Ok",

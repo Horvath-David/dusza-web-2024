@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.handlers.wsgi import WSGIRequest
 from django.db import IntegrityError
+from django.forms import model_to_dict
 from django.http import JsonResponse
 from authenticate import wrappers
 from api.models import School, UserData
@@ -98,4 +99,5 @@ def create_school(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "created": model_to_dict(school),
     }, status=200)
