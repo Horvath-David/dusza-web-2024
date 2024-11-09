@@ -10,7 +10,6 @@ export type Path =
   | `/auth/register`
   | `/categories`
   | `/new-team`
-  | `/organizer_view`
   | `/programming_langs`
   | `/school-test`
   | `/schools`;
