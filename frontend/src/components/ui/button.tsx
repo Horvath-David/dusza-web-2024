@@ -22,6 +22,12 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        sidebarLink:
+          "border border-input hover:bg-accent hover:text-accent-foreground justify-start gap-4",
+        sidebarPrimary:
+          "bg-primary text-primary-foreground hover:bg-primary/90 justify-start gap-4",
+        sidebarSecondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 justify-start gap-4",
       },
       size: {
         default: "h-10 px-4 py-2",
