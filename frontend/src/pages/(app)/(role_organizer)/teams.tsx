@@ -28,11 +28,11 @@ async function getTeams() {
   const res = await makeRequest<{
     status: string;
     error?: string;
-    teams: Team[];
+    list: Team[];
   }>({
     endpoint: "/team/get/approved_by_school",
   });
-  return res.data?.teams ?? [];
+  return res.data?.list ?? [];
 }
 
 const Teams: Component<{}> = () => {
@@ -42,16 +42,18 @@ const Teams: Component<{}> = () => {
     setAllTeamInfo(await getTeams());
   });
 
-  createEffect(() => console.log(allTeamInfo()));
-
   async function sendAlert(idNum: number) {
     const res = await makeRequest({
       method: "POST",
       endpoint: `/team/${idNum}/request_info_fix`,
-      body: {},
+      noErrorToast: true,
     });
     if (res.status === 304) {
       toast.warning("Már küldtek értesítést ennek a csapatnak");
+    } else if (!res.ok) {
+      toast.error("Hiba történt!", {
+        description: `Ismeretlen hiba (${res.status} ${res.statusText})`,
+      });
     } else {
       toast.success("Sikeres üzenet küldés");
     }

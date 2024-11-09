@@ -54,6 +54,7 @@ export interface DetailedShool {
 }
 
 export interface Notification {
+  id: number;
   title: string;
   text: string;
   manual_delete_enabled: boolean;
