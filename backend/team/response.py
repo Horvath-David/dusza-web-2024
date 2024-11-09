@@ -31,6 +31,17 @@ def create_team(request: WSGIRequest):
             "error": "Deadline has ended",
         }, status=403)
 
+    required_fields = ["supplementary_names", "supplementary_grades", "names", "grades", "school_id", "prog_lang_id",
+                       "category_id", "category_id", "team_name", "teacher_name"]
+
+    for i in body.keys:
+        if i not in required_fields:
+            return JsonResponse({
+                "status": "Error",
+                "error": "One or more fields are missing",
+            }, status=400)
+
+
     if len(body["supplementary_names"]) > 1 or len(body["supplementary_grades"]) > 1 or len(body["names"]) > 3 \
         or len(body["grades"]) > 3:
         return JsonResponse({

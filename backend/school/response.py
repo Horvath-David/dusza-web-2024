@@ -1,5 +1,6 @@
 import json
 from json import JSONDecodeError
+import modules
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -101,7 +102,7 @@ def create_school(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "created": model_to_dict(school),
+        "created": modules.django_model_operations.model_to_dict(school),
     }, status=200)
 
 
