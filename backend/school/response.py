@@ -7,6 +7,8 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.db import IntegrityError
 from django.forms import model_to_dict
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
 from authenticate import wrappers
 from api.models import School, UserData
 
@@ -100,4 +102,24 @@ def create_school(request: WSGIRequest):
         "status": "Ok",
         "error": None,
         "created": model_to_dict(school),
+    }, status=200)
+
+
+@login_required
+@wrappers.require_role(["organizer", "school"])
+@require_http_methods(["DELETE"])
+def delete_school(request: WSGIRequest, school_id):
+    user_data = UserData.objects.get(user=request.user)
+    school = School.objects.get(id=school_id)
+    if user_data.role == "school" and school.communicator != request.user:
+        return JsonResponse({
+            "status": "Error",
+            "error": "You do not have permission to delete this school",
+        }, status=403)
+
+    school.communicator.delete()
+
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
     }, status=200)
