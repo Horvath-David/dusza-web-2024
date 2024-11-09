@@ -8,7 +8,8 @@ export type Path =
   | `/auth`
   | `/auth/login`
   | `/auth/register`
-  | `/new-team`;
+  | `/new-team`
+  | `/organizer_view`;
 
 export type Params = {};
 
