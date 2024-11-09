@@ -113,15 +113,10 @@ def edit_team(request: WSGIRequest, team_id):
                     recipient=i.notify_on_action_taken,
                     title="Az egyik csapat visszavonta a nevezését",
                     text=f"Kedves {user_data.display_name}! "
-                         f"\nA(z) {Team.objects.get(id=team_id).name} csapat, az adatainak a módósítása helyett, visszavonta"
-                         f"\n a nevezését."
+                         f"\nA(z) {Team.objects.get(id=team_id).name} csapat, az adatainak a módósítása helyett, "
+                         f"visszavonta a nevezését."
                          f"\nÜdvözlettel,"
                          f"\nDusza panel",
-                    delete_on_modify={
-                        "name": "team",
-                        "id": team_id
-                    },
-                    notify_on_action_taken=request.user,
                 )
             i.delete()
 
@@ -172,11 +167,6 @@ def edit_team(request: WSGIRequest, team_id):
                  f"\nKérlek, ellenőrizd, hogy mostmár minden megfelelő-e!"
                  f"\nÜdvözlettel,"
                  f"\nDusza panel",
-            delete_on_modify={
-                "name": "team",
-                "id": team_id
-            },
-            notify_on_action_taken=request.user,
         )
         i.delete()
 
