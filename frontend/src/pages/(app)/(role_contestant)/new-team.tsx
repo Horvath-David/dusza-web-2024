@@ -26,6 +26,7 @@ import {
   NumberFieldLabel,
 } from "~/components/ui/number-field";
 import { Label } from "~/components/ui/label";
+import { toast } from "solid-sonner";
 
 async function getProgLangs() {
   const res = await makeRequest<{
@@ -112,6 +113,22 @@ const NewTeam: Component<{}> = () => {
       },
     });
     console.log(res);
+    if(res.status===200) {
+      toast.success("Sikeres hozzáadás");
+      setTeamName("");
+      setTeamMateOneName("");
+      setTeamMateOneGrade(8);
+      setTeamMateSecondName("");
+      setTeamMateSecondGrade(8);
+      setTeamMateThirdName("");
+      setTeamMateThirdGrade(8);
+      setSubstitudeTeamMateName("");
+      setSubstitudeTeamMateGrade(8);
+      setTeacher("");
+    }
+    else {
+      toast.error("Hiba történt")
+    }
   };
 
   return (

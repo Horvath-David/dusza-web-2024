@@ -33,5 +33,35 @@ export interface DetailedShool {
     username:string,
     email: string
   };
+}
 
+export interface TeamInfo{
+  id:number;
+  owner:number;
+  name:string;
+  members: [
+    {
+      name:string;
+      grade:number;
+    },
+    {
+      name:string;
+      grade:number;
+    },
+    {
+      name:string;
+      grade:number;
+    }
+  ];
+  supplementary_members: [
+    {
+      name:string;
+      grade:number;
+    }
+  ];
+  school: number;
+  teacher_name:string;
+  category: number;
+  prog_lang: number;
+  status:string;
 }

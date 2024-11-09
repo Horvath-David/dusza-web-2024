@@ -12,7 +12,8 @@ export type Path =
   | `/new-team`
   | `/programming_langs`
   | `/school-test`
-  | `/schools`;
+  | `/schools`
+  | `/teams`;
 
 export type Params = {};
 
