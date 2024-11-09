@@ -52,3 +52,9 @@ export interface DetailedShool {
     email: string;
   };
 }
+
+export interface Notification {
+  title: string;
+  text: string;
+  manual_delete_enabled: boolean;
+}

@@ -6,16 +6,18 @@ import {
   ParentProps,
   useContext,
 } from "solid-js";
-import { UserData } from "./models";
-import { makeRequest } from "./api";
+import { UserData } from "~/lib/models";
+import { makeRequest } from "~/lib/api";
 import { useNavigate } from "~/router";
 import { useLocation } from "@solidjs/router";
 import { toast } from "solid-sonner";
 
 const UserContext = createContext<Accessor<UserData | undefined>>();
+const NotificationContext = createContext<Accessor<Notification[]>>();
 
 export const UserProvider = (props: ParentProps) => {
   const [user, setUser] = createSignal<UserData>();
+  const [notifications, setNotifications] = createSignal<Notification[]>([]);
   const navigate = useNavigate();
   const loc = useLocation();
 
@@ -24,6 +26,7 @@ export const UserProvider = (props: ParentProps) => {
       status: string;
       error: string;
       user_data: UserData;
+      notifications: Notification[];
     }>({
       endpoint: "/me/",
       noErrorToast: true,
@@ -41,12 +44,18 @@ export const UserProvider = (props: ParentProps) => {
       return;
     }
     setUser(res.data?.user_data);
+    setNotifications(res.data?.notifications ?? []);
     localStorage.setItem("shouldBeLoggedIn", "true");
   });
 
   return (
-    <UserContext.Provider value={user}>{props.children}</UserContext.Provider>
+    <UserContext.Provider value={user}>
+      <NotificationContext.Provider value={notifications}>
+        {props.children}
+      </NotificationContext.Provider>
+    </UserContext.Provider>
   );
 };
 
 export const useUser = () => useContext(UserContext);
+export const useNotifications = () => useContext(NotificationContext);
