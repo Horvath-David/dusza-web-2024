@@ -16,13 +16,30 @@ from api.models import School, UserData
 @login_required
 @wrappers.require_role(["organizer", "contestant"])
 def list_all(request: WSGIRequest):
+    user_data = UserData.objects.get(user=request.user)
+    if user_data.role == "contestant":
+        return JsonResponse({
+            "status": "Ok",
+            "error": None,
+            "list": [{
+                "id": i.id,
+                "name": i.name,
+                "address": i.address
+            } for i in School.objects.all()]
+        })
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
         "list": [{
             "id": i.id,
             "name": i.name,
-            "address": i.address
+            "address": i.address,
+            "communicator": {
+                "name": UserData.objects.get(user=i.communicator).display_name,
+                "username": i.communicator.username,
+                "email": i.communicator.email,
+            }
         } for i in School.objects.all()]
     })
 
