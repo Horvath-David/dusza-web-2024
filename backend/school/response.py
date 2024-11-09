@@ -116,7 +116,7 @@ def manage_school(request: WSGIRequest, school_id):
         if user_data.role == "school" and school.communicator != request.user:
             return JsonResponse({
                 "status": "Error",
-                "error": "Nincs jogusultségod, hogy eltávolítsd ezt az iskolát",
+                "error": "Nincs jogosultságod, hogy eltávolítsd ezt az iskolát",
             }, status=403)
 
         school.communicator.delete()

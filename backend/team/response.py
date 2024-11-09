@@ -160,7 +160,7 @@ def edit_team(request: WSGIRequest, team_id):
     if user_object.role == "organizer":
         return JsonResponse({
             "status": "Ok",
-            "error": "Nincs jogusultságod, hogy végrehajtsd ezt a műveletet",
+            "error": "Nincs jogosultságod, hogy végrehajtsd ezt a műveletet",
         }, status=403)
 
     if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
@@ -257,13 +257,13 @@ def get_by_status(request: WSGIRequest, status: str):
     if user_data.role == "school" and status not in ["registered", "approved_by_school"]:
         return JsonResponse({
             "status": "Error",
-            "error": "Nincs jogusultségod, hogy elvégezd ezt a lekérdezést",
+            "error": "Nincs jogosultságod, hogy elvégezd ezt a lekérdezést",
         }, status=403)
 
     if user_data.role == "organizer" and status not in ["approved_by_school", "approved_by_organizer"]:
         return JsonResponse({
             "status": "Error",
-            "error": "Nincs jogusultségod, hogy elvégezd ezt a lekérdezést",
+            "error": "Nincs jogosultságod, hogy elvégezd ezt a lekérdezést",
         }, status=403)
 
 
@@ -307,14 +307,14 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
         if status != "approved_by_school" or team.status != "registered":
             return JsonResponse({
                 "status": "Error",
-                "error": "Nincs jogusultségod hogy végrehajtsd ezt a műveletet",
+                "error": "Nincs jogosultságod hogy végrehajtsd ezt a műveletet",
             }, status=403)
 
     if user_data.role == "organizer":
         if status != "approved_by_organizer" or team.status != "approved_by_school":
             return JsonResponse({
                 "status": "Error",
-                "error": "Nincs jogusultségod hogy végrehajtsd ezt a műveletet",
+                "error": "Nincs jogosultságod hogy végrehajtsd ezt a műveletet",
             }, status=403)
 
     team.status = status
