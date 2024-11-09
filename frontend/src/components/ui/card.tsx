@@ -19,7 +19,7 @@ const Card: Component<ComponentProps<"div">> = (props) => {
 const CardHeader: Component<ComponentProps<"div">> = (props) => {
   const [local, others] = splitProps(props, ["class"]);
   return (
-    <div class={cn("flex flex-col space-y-1.5 p-6", local.class)} {...others} />
+    <div class={cn("flex flex-col gap-y-1.5 p-6", local.class)} {...others} />
   );
 };
 

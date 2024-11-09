@@ -254,7 +254,7 @@ export const Sidebar: Component<{}> = () => {
   );
 };
 
-const Hr: Component<{ padding: string; class?: string }> = (props) => {
+export const Hr: Component<{ padding: string; class?: string }> = (props) => {
   return (
     <div
       style={{
