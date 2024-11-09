@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'school.apps.SchoolConfig',
     'category.apps.CategoryConfig',
     'prog_lang.apps.ProgLangConfig',
-    'me.apps.MeConfig'
+    'me.apps.MeConfig',
+    'configure.apps.ConfigureConfig'
 ]
 
 MIDDLEWARE = [
