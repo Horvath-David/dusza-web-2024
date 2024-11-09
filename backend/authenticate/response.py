@@ -86,6 +86,7 @@ def register(request: WSGIRequest):
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "user_data": get_extended_user_data(user),
     }, status=200)
 
 

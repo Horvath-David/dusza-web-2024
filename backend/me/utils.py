@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 from api.models import Team, UserData
 
+
 class ExtendedUserData(TypedDict):
     user_id: int
     user_data_id: int
@@ -19,7 +20,7 @@ def get_extended_user_data(user: User) -> ExtendedUserData:
     return {
         "user_id": user_data.user.pk,
         "user_data_id": user_data.pk,
-        "team_id": None if team_id_obj == None else team_id_obj.id,
+        "team_id": None if team_id_obj is None else team_id_obj.id,
         "username": user_data.user.username,
         "display_name": user_data.display_name,
         "role": user_data.role,
