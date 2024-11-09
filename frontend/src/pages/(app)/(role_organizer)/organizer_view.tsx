@@ -78,6 +78,7 @@ const OrganizerView: Component<{}> = () => {
   onMount(async () => {
     setAllProgLang(await getAllProgLang());
     setAllCategory(await getAllCategory());
+    setAllSchool(await getAllShoolInfo());
   });
 
   const handleSubmitNewProgLang = async (event: SubmitEvent) => {
@@ -92,7 +93,7 @@ const OrganizerView: Component<{}> = () => {
     });
     setAllProgLang([
       ...allProgLang(),
-      { id: allProgLang().length + 1, name: newProgLang() },
+      { id: allProgLang()[-1].id+1, name: newProgLang() },
     ]);
     console.log(allProgLang());
   };
@@ -109,7 +110,7 @@ const OrganizerView: Component<{}> = () => {
     });
     setAllCategory([
       ...allCategory(),
-      { id: allCategory().length + 1, name: newCategory() },
+      { id: allCategory()[-1].id + 1, name: newCategory() },
     ]);
   };
 
@@ -337,23 +338,53 @@ const OrganizerView: Component<{}> = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow>
-              <TableCell>Mechwart</TableCell>
-              <TableCell class="text-right">
-                <Dialog>
-                  <DialogTrigger>
-                    <Button variant="secondary">
-                      <FaSolidPencil />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>XY szerkeztése</DialogTitle>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
-              </TableCell>
-            </TableRow>
+            <For each={allSchool()}>
+            {(school) => (
+              <TableRow>
+                <TableCell>{school.name}</TableCell>
+                <TableCell class="text-right">
+                  <Dialog>
+                    <DialogTrigger>
+                      <Button variant="secondary">
+                        <FaSolidPencil />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{school.name} szerkeztése</DialogTitle>
+                      </DialogHeader>
+                      <div>
+                      <TextField class="grid grid-cols-4 items-center gap-4" onChange={setSchoolName}>
+                        <TextFieldLabel class="text-right text-sm">Neve</TextFieldLabel>
+                        <TextFieldInput value={school.name} class="col-span-3" type="text" />
+                      </TextField>
+                      <TextField class="grid grid-cols-4 items-center gap-4" onChange={setSchoolAddress}>
+                        <TextFieldLabel class="text-right text-sm">Címe</TextFieldLabel>
+                        <TextFieldInput value={school.address} class="col-span-3" type="text" />
+                      </TextField>
+                      <TextField class="grid grid-cols-4 items-center gap-4" onChange={setSchoolUserName}>
+                        <TextFieldLabel class="text-right text-sm">Felhasználó neve</TextFieldLabel>
+                        <TextFieldInput value={school.communicator.username} class="col-span-3" type="text" />
+                      </TextField>
+                      <TextField class="grid grid-cols-4 items-center gap-4" onChange={setCommunicatorName}>
+                        <TextFieldLabel class="text-right text-sm">Kapcsolattartó neve</TextFieldLabel>
+                        <TextFieldInput value={school.communicator.name} class="col-span-3" type="text" />
+                      </TextField>
+                      <TextField class="grid grid-cols-4 items-center gap-4" onChange={setCommunicatorEmail}>
+                        <TextFieldLabel class="text-right text-sm">Kapcsolattartó email címe</TextFieldLabel>
+                        <TextFieldInput value={school.communicator.email} class="col-span-3" type="text" />
+                      </TextField>
+                      
+                      </div>
+                      <DialogFooter>
+                        <Button variant="destructive" >Törlés</Button>
+                        <Button>Szerkeztés</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </TableCell>
+              </TableRow>
+            )}</For>
           </TableBody>
         </Table>
       </div>
