@@ -30,7 +30,7 @@ async function getTeams() {
     error?: string;
     teams: Team[];
   }>({
-    endpoint: "/team/all",
+    endpoint: "/team/get/approved_by_school",
   });
   return res.data?.teams ?? [];
 }
