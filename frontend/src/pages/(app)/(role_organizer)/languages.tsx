@@ -24,9 +24,7 @@ import {
 import {
   FaSolidCheck,
   FaSolidPlus,
-  FaSolidTrashCan,
-  FaSolidX,
-  FaSolidXmark,
+  FaSolidTrashCan, FaSolidXmark
 } from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Button } from "~/components/ui/button";
@@ -156,7 +154,7 @@ const ProgrammingLangs: Component<{}> = () => {
                                 class="flex-1"
                                 onClick={() => setOpen(false)}
                               >
-                                <FaSolidX />
+                                <FaSolidXmark />
                                 Nem
                               </Button>
                               <Button

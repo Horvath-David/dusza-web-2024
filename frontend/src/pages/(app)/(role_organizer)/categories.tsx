@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount } from "solid-js";
+import { Component, createSignal, For, onMount, Show } from "solid-js";
 import {
   Table,
   TableBody,
@@ -20,10 +20,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { FaSolidTrashCan } from "solid-icons/fa";
+import {
+  FaSolidCheck,
+  FaSolidPlus,
+  FaSolidTrashCan,
+  FaSolidX,
+  FaSolidXmark,
+} from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Button } from "~/components/ui/button";
 import { Category } from "~/lib/models";
+import { toast } from "solid-sonner";
+import { Spinner } from "~/components/Spinner";
+import { Hr } from "~/components/Sidebar";
 
 async function getAllCategory() {
   const res = await makeRequest<{
@@ -40,6 +49,9 @@ const Categories: Component<{}> = () => {
   const [newCategory, setNewCategory] = createSignal("");
   const [allCategory, setAllCategory] = createSignal<Category[]>([]);
 
+  const [deleting, setDeleting] = createSignal(false);
+  const [adding, setAdding] = createSignal(false);
+
   onMount(async () => {
     setAllCategory(await getAllCategory());
   });
@@ -47,6 +59,7 @@ const Categories: Component<{}> = () => {
   const handleSubmitNewCategory = async (event: SubmitEvent) => {
     event.preventDefault();
 
+    setAdding(true);
     const res = await makeRequest({
       method: "POST",
       endpoint: "/category/create",
@@ -54,19 +67,28 @@ const Categories: Component<{}> = () => {
         name: newCategory(),
       },
     });
-    setAllCategory([
-      ...allCategory(),
-      { id: res.data?.created.id, name: newCategory() },
-    ]);
-    setNewCategory("");
+    if (res.ok) {
+      setAllCategory([
+        ...allCategory(),
+        { id: res.data?.created.id, name: newCategory() },
+      ]);
+      setNewCategory("");
+      toast.success("Kategória sikeresen hozzáadva!");
+    }
+    setAdding(false);
   };
 
   async function deleteCategory(id: Number) {
-    await makeRequest({
+    setDeleting(true);
+    const res = await makeRequest({
       method: "DELETE",
       endpoint: `/category/delete/${id}`,
     });
-    setAllCategory([...allCategory().filter((x) => x.id !== id)]);
+    if (res.ok) {
+      setAllCategory([...allCategory().filter((x) => x.id !== id)]);
+      toast.success("Sikeres törlés!");
+    }
+    setDeleting(false);
   }
 
   return (
@@ -77,7 +99,12 @@ const Categories: Component<{}> = () => {
           <TextFieldLabel>Kategória hozzáadása:</TextFieldLabel>
           <TextFieldInput type="text"></TextFieldInput>
         </TextField>
-        <Button type="submit">Hozzáadás</Button>
+        <Button type="submit" disabled={adding()}>
+          <Show when={!adding()} fallback={<Spinner />}>
+            <FaSolidPlus />
+          </Show>
+          Hozzáadás
+        </Button>
       </form>
 
       <Table>
@@ -95,30 +122,63 @@ const Categories: Component<{}> = () => {
               <TableRow>
                 <TableCell>{category.name}</TableCell>
                 <TableCell class="text-right">
-                  <Dialog>
-                    <DialogTrigger>
-                      <Button variant="destructive">
-                        <FaSolidTrashCan />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Biztos hogy szeretné törölni?</DialogTitle>
-                      </DialogHeader>
+                  {(() => {
+                    const [open, setOpen] = createSignal(false);
 
-                      <DialogFooter>
-                        <Button
-                          variant="destructive"
-                          onClick={() => {
-                            deleteCategory(category.id);
-                          }}
-                        >
-                          Igen
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  {/* <Button variant="destructive" onClick={()=>{deleteCategory(category.id); setNewCategory("")}}><FaSolidTrashCan /></Button> */}
+                    return (
+                      <Dialog open={open()} onOpenChange={setOpen}>
+                        <DialogTrigger class="ml-auto">
+                          <Button variant="destructive" size="icon">
+                            <FaSolidTrashCan />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent noDefaultCloseButton={true} class="py-4">
+                          <DialogHeader class="flex-row items-center">
+                            <DialogTitle class="text-xl">
+                              Biztos, hogy szeretné törölni?
+                            </DialogTitle>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              class="-mr-2 ml-auto"
+                              onClick={() => setOpen(false)}
+                            >
+                              <FaSolidXmark
+                                size={20}
+                                class="text-muted-foreground"
+                              />
+                            </Button>
+                          </DialogHeader>
+                          <Hr padding="1.5rem" />
+                          <DialogFooter class="-mx-2 flex-col gap-4">
+                            <div class="flex w-full gap-4">
+                              <Button
+                                variant="secondary"
+                                class="flex-1"
+                                onClick={() => setOpen(false)}
+                              >
+                                <FaSolidXmark />
+                                Nem
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                class="flex-1"
+                                onClick={() => {
+                                  deleteCategory(category.id);
+                                }}
+                                disabled={deleting()}
+                              >
+                                <Show when={!deleting()} fallback={<Spinner />}>
+                                  <FaSolidCheck />
+                                </Show>
+                                Igen
+                              </Button>
+                            </div>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    );
+                  })()}
                 </TableCell>
               </TableRow>
             )}
