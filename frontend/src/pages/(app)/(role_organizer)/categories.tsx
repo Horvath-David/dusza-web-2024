@@ -118,10 +118,7 @@ const Categories: Component<{}> = () => {
                           <Button
                             variant="destructive"
                             onClick={() => {
-                              deleteCategory(category.id);
-                              setNewCategory("");
-                            }}
-                          >
+                              deleteCategory(category.id);}}>
                             Igen
                           </Button>
                         </DialogFooter>

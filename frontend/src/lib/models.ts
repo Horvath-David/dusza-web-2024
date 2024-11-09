@@ -9,6 +9,7 @@ export interface UserData {
 }
 
 export interface Team {
+  id: number;
   owner: number;
   name: string;
   members: TeamMember[];

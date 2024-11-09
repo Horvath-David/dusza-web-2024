@@ -16,6 +16,10 @@ import {
   FaSolidQuestion,
 } from "solid-icons/fa";
 import { IconTypes } from "solid-icons";
+import { FaRegularFileCode } from 'solid-icons/fa'
+import { FaSolidSchoolFlag } from 'solid-icons/fa'
+import { BiRegularCategoryAlt } from 'solid-icons/bi'
+import { AiOutlineTeam } from 'solid-icons/ai'
 import { useLocation } from "@solidjs/router";
 import { Branding } from "./Branding";
 
@@ -48,6 +52,34 @@ function getRouteData(path: string): RouteData {
           return !!user()?.team_id;
         },
         order: 1,
+      };
+    
+    case "/programming_langs":
+      return {
+        title:"Programozási nyelvek",
+        icon: FaRegularFileCode,
+        order:1,
+      };
+
+    case "/categories": 
+      return {
+        title:"Kategóriák",
+        icon: BiRegularCategoryAlt,
+        order:2,
+      };
+
+    case "/schools":
+      return {
+        title: "Intézmények",
+        icon: FaSolidSchoolFlag,
+        order: 3,
+      };
+    
+    case "/teams":
+      return {
+        title:"Csapatok",
+        icon: AiOutlineTeam,
+        order:4,
       };
 
     case "/asd/school-test":
