@@ -170,6 +170,7 @@ def edit_team(request: WSGIRequest, team_id):
     return JsonResponse({
         "status": "Ok",
         "error": None,
+        "modified": model_to_dict(Team.objects.get(id=team_id))
     }, status=200)
 
 
@@ -275,3 +276,13 @@ def request_info_fix(request: WSGIRequest, team_id):
         "error": None,
     }, status=200)
 
+
+@login_required
+@require_GET
+@wrappers.require_role(["contestant"])
+def my_team(request: WSGIRequest):
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+        "team": model_to_dict(Team.objects.get(owner=request.user)),
+    }, status=200)

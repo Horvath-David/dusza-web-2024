@@ -8,4 +8,5 @@ urlpatterns = [
     path('<int:team_id>/request_info_fix', response.request_info_fix),
     path('<int:team_id>/change_status/<str:status>', response.change_status),
     path('<str:status>', response.get_by_status),
+    path('me', response.my_team),
 ]
