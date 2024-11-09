@@ -1,7 +1,7 @@
 import { Component, createEffect, ParentProps, Show } from "solid-js";
 import { Sidebar } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
-import { useUser } from "~/lib/userContext";
+import { useUser } from "~/contexts/userContext";
 import { cn } from "~/lib/utils";
 
 const AppLayout: Component<{}> = (props: ParentProps) => {

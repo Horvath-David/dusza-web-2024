@@ -1,6 +1,6 @@
 import { Component, ParentProps } from "solid-js";
 import { Toaster } from "solid-sonner";
-import { UserProvider } from "~/lib/userContext";
+import { UserProvider } from "~/contexts/userContext";
 
 const RootLayout: Component<{}> = (props: ParentProps) => {
   return (

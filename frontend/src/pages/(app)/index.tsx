@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { useUser } from "~/lib/userContext";
+import { useUser } from "~/contexts/userContext";
 
 const Home: Component<{}> = () => {
   const user = useUser()!;

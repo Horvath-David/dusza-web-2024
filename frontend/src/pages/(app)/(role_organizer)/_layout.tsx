@@ -1,6 +1,6 @@
 import { Component, createSignal, onMount, ParentProps, Show } from "solid-js";
 import { toast } from "solid-sonner";
-import { useUser } from "~/lib/userContext";
+import { useUser } from "~/contexts/userContext";
 import { useNavigate } from "~/router";
 
 const _layout: Component<{}> = (props: ParentProps) => {

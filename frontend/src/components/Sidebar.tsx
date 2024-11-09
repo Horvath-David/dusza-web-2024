@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { Spinner } from "./Spinner";
 import { makeRequest } from "~/lib/api";
 import { toast } from "solid-sonner";
-import { useUser } from "~/lib/userContext";
+import { useUser } from "~/contexts/userContext";
 import { Path, useNavigate } from "~/router";
 import { routes } from "@generouted/solid-router";
 import {
