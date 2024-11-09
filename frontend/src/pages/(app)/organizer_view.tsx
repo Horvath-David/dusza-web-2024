@@ -23,10 +23,10 @@ import {
     DialogTrigger
   } from "~/components/ui/dialog"
 import { FaSolidTrashCan } from 'solid-icons/fa'
+import { FaSolidPencil } from 'solid-icons/fa'
 import { makeRequest } from "~/lib/api";
-import { Category, ProgrammingLanguage } from "~/lib/models";
+import { Category, DetailedShool, ProgrammingLanguage } from "~/lib/models";
 
-import { DialogCloseButton } from "@kobalte/core/src/dialog/dialog-close-button.jsx";
 
 
 
@@ -39,8 +39,19 @@ async function getAllProgLang() {
         endpoint: "/prog_lang/all",
       });
       return res.data?.list ?? [];
-
 }
+
+async function getAllShoolInfo() {
+    const res = await makeRequest<{
+        status: string;
+        error?: string;
+        list: DetailedShool[];
+      }>({
+        endpoint: "/school/all",
+      });
+      return res.data?.list ?? [];
+}
+
 
 async function getAllCategory() {
     const res = await makeRequest<{
@@ -64,6 +75,7 @@ const OrganizerView: Component<{}> = () => {
 
     const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
     const [allCategory, setAllCategory] = createSignal<Category[]>([]);
+    const [allSchool, setAllSchool] = createSignal<DetailedShool[]>([]);
 
     const [schoolName, setSchoolName] = createSignal("");
     const [schoolAddress, setSchoolAddress] = createSignal("");
@@ -88,7 +100,7 @@ const OrganizerView: Component<{}> = () => {
               "name":newProgLang()
             },
           });
-        setAllProgLang([...allProgLang(), {id: allProgLang().length, name: newProgLang()}])
+        setAllProgLang([...allProgLang(), {id: allProgLang().length+1, name: newProgLang()}])
         console.log(allProgLang());
     }
 
@@ -102,7 +114,7 @@ const OrganizerView: Component<{}> = () => {
               "name":newCategory()
             },
           });
-          setAllCategory([...allCategory(), {id: allCategory().length, name: newCategory()}])
+          setAllCategory([...allCategory(), {id: allCategory().length+1, name: newCategory()}])
     }
 
     const handleSubmitNewShool = async (event:SubmitEvent) => {
@@ -215,17 +227,17 @@ const OrganizerView: Component<{}> = () => {
                                 <TableCell>{category.name}</TableCell>
                                 <TableCell class="text-right">
                                 <Dialog>
-                                            <DialogTrigger  ><Button variant="destructive"><FaSolidTrashCan /></Button></DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>Biztos hogy szeretné törölni?</DialogTitle> 
-                                                </DialogHeader>
+                                        <DialogTrigger><Button variant="destructive"><FaSolidTrashCan /></Button></DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Biztos hogy szeretné törölni?</DialogTitle> 
+                                            </DialogHeader>
 
-                                                <DialogFooter>
-                                                    
-                                                    <Button variant="destructive" onClick={()=>{deleteCategory(category.id);setNewCategory("")}}>Igen</Button>
-                                                </DialogFooter>
-                                            </DialogContent>
+                                            <DialogFooter>
+                                                
+                                                <Button variant="destructive" onClick={()=>{deleteCategory(category.id);setNewCategory("")}}>Igen</Button>
+                                            </DialogFooter>
+                                        </DialogContent>
                                     
                                         </Dialog>
                                     {/* <Button variant="destructive" onClick={()=>{deleteCategory(category.id); setNewCategory("")}}><FaSolidTrashCan /></Button> */}
@@ -266,6 +278,34 @@ const OrganizerView: Component<{}> = () => {
                     </TextField>
                     <Button class="mb-4 mt-6 w-full" type="submit">Hozzáadás</Button>
                 </form>
+            </div>
+            <div>
+                <h2 class="mb-4 mt-8 text-xl font-semibold">Intézmények megtekintése:</h2>
+                <Table class="max-w-50">
+                    <TableCaption>Intézmények</TableCaption>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Intézméynek</TableHead>
+                            <TableHead class="text-right">Szerkeztés</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell>Mechwart</TableCell>
+                            <TableCell class="text-right">
+                                <Dialog>
+                                    <DialogTrigger><Button variant="secondary"><FaSolidPencil/></Button></DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>XY szerkeztése</DialogTitle>
+                                        </DialogHeader>
+                                    </DialogContent>
+                                </Dialog>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+
+                </Table>
             </div>
         </div>
     );
