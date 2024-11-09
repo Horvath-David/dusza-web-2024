@@ -188,9 +188,15 @@ def edit_team(request: WSGIRequest, team_id):
 
 @login_required
 @require_GET
-@wrappers.require_role(["organizer"])
+@wrappers.require_role(["organizer", "school"])
 def all_team(request: WSGIRequest):
-    teams = Team.objects.select_related('prog_lang', 'category', 'school').all()
+    user_data = UserData.objects.get(user=request.user)
+
+    if user_data.role == "organizer":
+        teams = Team.objects.select_related('prog_lang', 'category', 'school').all()
+    else:
+        teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(school=School.objects.get(communicator=request.user))
+
 
     teams_list = []
     for team in teams:
