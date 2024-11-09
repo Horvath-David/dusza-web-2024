@@ -18,6 +18,7 @@ TEAM_STATUSES = (
 
 
 class Config(models.Model):
+    name = models.CharField(max_length=255)
     data = models.JSONField()
     modified = models.DateTimeField()
     created = models.DateTimeField(editable=False)
@@ -34,7 +35,7 @@ class UserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=255, unique=False)
     role = models.CharField(max_length=255, choices=ROLE_CHOICES)
-    grade = models.IntegerField(blank=True, null=True)
+    grade = models.IntegerField(blank=True, null=True, default=None)
     unsuccessful_attempts = models.IntegerField(default=0)
     is_disabled = models.BooleanField(default=False)
 
@@ -60,6 +61,7 @@ class School(models.Model):
 
     def __str__(self):
         return f"({self.id}) {self.name}"
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
