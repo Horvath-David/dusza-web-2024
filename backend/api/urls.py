@@ -1,5 +1,6 @@
 from django.urls import path, include
 import authenticate.urls, team.urls, school.urls, prog_lang.urls, category.urls, me.urls, configure.urls
+from . import response
 
 urlpatterns = [
     path('auth/', include(authenticate.urls)),
@@ -9,4 +10,6 @@ urlpatterns = [
     path('category/', include(category.urls)),
     path('config/', include(configure.urls)),
     path('me/', include(me.urls)),
+    path('statistics/', response.statistics),
 ]
+
