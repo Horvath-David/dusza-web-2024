@@ -153,7 +153,7 @@ def edit_team(request: WSGIRequest, team_id):
             "error": "Team with provided ID not found",
         }, status=404)
     try:
-        Team.objects.update(id=team_id, **body)
+        Team.objects.get(id=team_id).update(**body)
     except IntegrityError:
         return JsonResponse({
             "status": "Error",
@@ -190,10 +190,20 @@ def edit_team(request: WSGIRequest, team_id):
 @require_GET
 @wrappers.require_role(["organizer"])
 def all_team(request: WSGIRequest):
+    team = Team.objects.select_related('prog_lang', 'category', 'school', 'school').all()
+
+    # Convert team to dict
+    team_dict = model_to_dict(team)
+
+    # Convert foreign keys to dictionaries
+    team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
+    team_dict['category'] = model_to_dict(team.category) if team.category else None
+    team_dict['school'] = model_to_dict(team.school) if team.school else None
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "list": [model_to_dict(i) for i in Team.objects.all()]
+        "team": team_dict,
     }, status=200)
 
 
@@ -209,7 +219,13 @@ def get_by_status(request: WSGIRequest, status: str):
         }, status=400)
 
     user_data = UserData.objects.get(user=request.user)
-    if user_data.role == "school" and status not in ["approved_by_organizer", "approved_by_school"]:
+    if user_data.role == "school" and status not in ["registered", "approved_by_school"]:
+        return JsonResponse({
+            "status": "Error",
+            "error": "You do not have permission to perform this query",
+        }, status=403)
+
+    if user_data.role == "organizer" and status not in ["approved_by_school", "approved_by_organizer"]:
         return JsonResponse({
             "status": "Error",
             "error": "You do not have permission to perform this query",
@@ -293,8 +309,18 @@ def request_info_fix(request: WSGIRequest, team_id):
 @require_GET
 @wrappers.require_role(["contestant"])
 def my_team(request: WSGIRequest):
+    team = Team.objects.select_related('prog_lang', 'category', 'school', 'school').get(owner=request.user)
+
+    # Convert team to dict
+    team_dict = model_to_dict(team)
+
+    # Convert foreign keys to dictionaries
+    team_dict['prog_lang'] = model_to_dict(team.prog_lang) if team.prog_lang else None
+    team_dict['category'] = model_to_dict(team.category) if team.category else None
+    team_dict['school'] = model_to_dict(team.school) if team.school else None
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "team": model_to_dict(Team.objects.get(owner=request.user)),
+        "team": team_dict,
     }, status=200)
