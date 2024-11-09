@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onMount, Show } from "solid-js";
 import {
   TextField,
   TextFieldLabel,
@@ -28,8 +28,12 @@ import {
 import { Label } from "~/components/ui/label";
 import { Spinner } from "~/components/Spinner";
 import { toast } from "solid-sonner";
-import { useUser } from "~/contexts/userContext";
+import { useNotifications, useUser } from "~/contexts/userContext";
 import { FaSolidFloppyDisk } from "solid-icons/fa";
+import { Callout, CalloutContent, CalloutTitle } from "~/components/ui/callout";
+import { R } from "node_modules/@kobalte/core/dist/index-f15c7ba5";
+import { P } from "node_modules/@kobalte/core/dist/popper-root-4f4dc506";
+
 
 async function getProgLangs() {
   const res = await makeRequest<{
@@ -92,9 +96,11 @@ const NewTeam: Component<{}> = () => {
   const [loading, setLoading] = createSignal(true);
   const [saving, setSaving] = createSignal(false);
 
+  const notifications = useNotifications()!;
+  const [notify, setNotify] = createSignal(false);
+
   onMount(async () => {
     setLoading(true);
-
     setAllSchool(await getSchool());
     setAllCategory(await getCategory());
     setAllProgLang(await getProgLangs());
@@ -107,7 +113,6 @@ const NewTeam: Component<{}> = () => {
       endpoint: "/team/me",
       method: "GET",
     });
-
     const team = teamRes.data?.team;
 
     setTeamName(team?.name ?? "");
@@ -127,6 +132,13 @@ const NewTeam: Component<{}> = () => {
 
     setLoading(false);
   });
+  
+  createEffect(() =>{
+    if(notifications()[0] !== undefined) {
+        setNotify(true);
+        console.log(notifications()[0])
+    }
+  })
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -193,6 +205,17 @@ const NewTeam: Component<{}> = () => {
       <h1 class="my-8 text-2xl font-semibold">Csapat szerkesztése</h1>
 
       <Show when={!loading()} fallback={<Spinner />}>
+      <Show when={notify()}>
+        <Callout variant="warning">
+          <CalloutTitle>{notifications()[0].title}</CalloutTitle>
+           <CalloutContent>
+            <For each={notifications()[0].text.split("\n")}>{
+            (noty) => (
+              <p>{noty}</p>
+            )
+            }</For></CalloutContent>
+        </Callout>
+      </Show>
         <TextField
           class="max-w-full"
           value={teamName()}
