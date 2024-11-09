@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Model, ManyToManyField
+from django.utils import timezone
 
 # Create your models here.
 ROLE_CHOICES = (
@@ -14,6 +15,19 @@ TEAM_STATUSES = (
     ('approved_by_organizer', 'Szervező által jóváhagyva'),
     ('approved_by_school', 'Iskola által jóváhagyva'),
 )
+
+
+class Config(models.Model):
+    data = models.JSONField()
+    modified = models.DateTimeField()
+    created = models.DateTimeField(editable=False)
+
+    def save(self, *args, **kwargs):
+        """ On save, update timestamps """
+        if not self.id:
+            self.created = timezone.now()
+        self.modified = timezone.now()
+        return super(Config, self).save(*args, **kwargs)
 
 
 class UserData(models.Model):

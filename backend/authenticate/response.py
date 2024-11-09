@@ -64,7 +64,7 @@ def register(request: WSGIRequest):
             "status": "Error",
             "error": "User with this username already exists",
         }, status=400)
-    for i in ["username", "password", "last_name", "first_name"]:
+    for i in ["username", "password"]:
         if i not in data.keys():
             return JsonResponse({
                 "status": "Error",
@@ -74,12 +74,11 @@ def register(request: WSGIRequest):
     user = User.objects.create(
         username=data["username"],
         password=data["password"],
-        first_name=data["first_name"],
-        last_name=data["last_name"]
     )
     UserData.objects.create(
         user=user,
         role="contestant",
+        display_name=data["display_name"],
         grade=data["grade"] if "grade" in data.keys() else None,
     )
     user.save()
