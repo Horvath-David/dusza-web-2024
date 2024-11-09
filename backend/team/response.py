@@ -110,7 +110,7 @@ def edit_team(request: WSGIRequest, team_id):
             if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
                 return JsonResponse({
                     "status": "Error",
-                    "error": "Már lejárt a jelentkezési határidő, ezért a nevezésedet sem tudod visszavonni. Ha már nem kívéncs részt venni a versenyben, akkor kérlek vedd fel a kapcsolatot az egyik szervezővel",
+                    "error": "Már lejárt a jelentkezési határidő, ezért a nevezésedet már nem tudod visszavonni. Ha már nem kívéncs részt venni a versenyben, akkor kérlek vedd fel a kapcsolatot az egyik szervezővel",
                 }, status=403)
             if not Team.objects.filter(id=team_id).exists():
                 return JsonResponse({
@@ -166,7 +166,7 @@ def edit_team(request: WSGIRequest, team_id):
     if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
         return JsonResponse({
             "status": "Error",
-            "error": "Már lejárt a jelentkezési határidő, ezért az adataidat sem tudod már módosítani",
+            "error": "Már lejárt a jelentkezési határidő, ezért az adatokat nem tudod már módosítani",
         }, status=403)
 
     try:
@@ -335,6 +335,12 @@ def request_info_fix(request: WSGIRequest, team_id):
             "status": "Ez a csapat már kapott figyelmeztetést. Majd értesíteni fogom az eredeti jelentőt ha reagált a csapat a kérésére",
             "error": None,
         }, status=304)
+
+    if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
+        return JsonResponse({
+            "status": "Error",
+            "error": "Nem küldtem el a kérést, mert már lejárt a jelentkezései határidő, és a csapat nem tudná már módósítani az adatait",
+        }, status=403)
 
     team_obj = Team.objects.get(id=team_id)
     user_data = UserData.objects.get(user=team_obj.owner)
