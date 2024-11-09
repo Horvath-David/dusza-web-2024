@@ -10,6 +10,7 @@ export type Path =
   | `/auth/register`
   | `/new-team`
   | `/organizer_view`
+  | `/programming_langs`
   | `/school-test`;
 
 export type Params = {};
