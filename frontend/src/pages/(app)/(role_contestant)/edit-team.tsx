@@ -28,7 +28,7 @@ import {
 import { Label } from "~/components/ui/label";
 import { Spinner } from "~/components/Spinner";
 import { toast } from "solid-sonner";
-import { useUser } from "~/lib/userContext";
+import { useUser } from "~/contexts/userContext";
 import { FaSolidFloppyDisk } from "solid-icons/fa";
 
 async function getProgLangs() {
