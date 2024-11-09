@@ -142,6 +142,7 @@ def edit_team(request: WSGIRequest, team_id):
 
     try:
         body = json.loads(request.body)
+        body.pop("status", None)
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
@@ -248,7 +249,7 @@ def get_by_status(request: WSGIRequest, status: str):
 
 
 @login_required
-@require_GET
+@require_POST
 @wrappers.require_role(["organizer", "school"])
 def change_status(request: WSGIRequest, status: str, team_id: int):
     valid_statuses = [i[0] for i in TEAM_STATUSES]
@@ -261,12 +262,19 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
     user_data = UserData.objects.get(user=request.user)
     team = Team.objects.get(id=team_id)
 
-    if (user_data.role == "school" and status != "approved_by_school") \
-            or (user_data.role == "organizer" and status != "approved_by_organizer"):
-        return JsonResponse({
-            "status": "Error",
-            "error": "You do not have permission to perform this operation",
-        }, status=403)
+    if user_data.role == "school":
+        if status != "approved_by_school" or team.status != "registered":
+            return JsonResponse({
+                "status": "Error",
+                "error": "You do not have permission to perform this operation",
+            }, status=403)
+
+    if user_data.role == "organizer":
+        if status != "approved_by_organizer" or team.status != "approved_by_school":
+            return JsonResponse({
+                "status": "Error",
+                "error": "You do not have permission to perform this operation",
+            }, status=403)
 
     team.status = status
     team.save()

@@ -82,7 +82,7 @@ def user_info(request: WSGIRequest):
         "status": "Ok",
         "error": None,
         "user_data": get_extended_user_data(request.user),
-        "notifications": [model_to_dict(i) for i in Notification.objects.filter(recipient=request.user)]
+        "notifications": [model_to_dict(i, fields=["title", "text", "manual_delete_enabled"]) for i in Notification.objects.filter(recipient=request.user)]
     }, status=200)
 
 
