@@ -12,6 +12,7 @@ export interface APIRequest {
   canRefreshToken?: boolean;
   decodeJson?: boolean;
   useFormData?: boolean;
+  noErrorToast?: boolean;
 }
 
 export interface APIResponse<T = any> extends Response {
@@ -71,7 +72,7 @@ export async function makeRequest<T = any>(
   params: APIRequest,
 ): Promise<APIResponse<T>> {
   const resp = await doRequest(params);
-  if (resp.data?.error) {
+  if (resp.data?.error && !params.noErrorToast) {
     toast.error("Hiba történt!", { description: resp.data.error });
   }
   return resp;

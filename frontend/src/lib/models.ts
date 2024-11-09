@@ -5,6 +5,7 @@ export interface UserData {
   display_name: string;
   role: string;
   grade?: number;
+  team_id?: number;
 }
 
 export interface ProgrammingLanguage {

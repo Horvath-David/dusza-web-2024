@@ -1,9 +1,33 @@
-import { Component } from "solid-js";
+import { Component, createSignal, Show } from "solid-js";
 import { Button } from "./ui/button";
 import { FiLogOut } from "solid-icons/fi";
 import { cn } from "~/lib/utils";
+import { Spinner } from "./Spinner";
+import { makeRequest } from "~/lib/api";
+import { toast } from "solid-sonner";
+import { useUser } from "~/lib/userContext";
+import { useNavigate } from "~/router";
 
 export const Sidebar: Component<{}> = () => {
+  const user = useUser()!;
+  const navigate = useNavigate();
+  const [loading, setLoading] = createSignal(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    const res = await makeRequest({
+      endpoint: "/auth/logout",
+      method: "GET",
+    });
+    if (res.ok) {
+      toast.success("Sikeres kijelentkezés!");
+      localStorage.setItem("shouldBeLoggedIn", "false");
+      navigate("/auth/login");
+      //TODO: set user context to undefined
+    }
+    setLoading(true);
+  };
+
   return (
     <div class="flex h-full flex-col gap-4 p-4">
       {/* Branding */}
@@ -20,10 +44,26 @@ export const Sidebar: Component<{}> = () => {
 
       {/* Bottom user part */}
       <div class="flex gap-4">
-        
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-700 to-cyan-400 text-xl font-black">
+          {user()?.display_name?.at(0)?.toUpperCase() ?? "U"}
+        </div>
+        <div class="flex flex-col justify-between">
+          <div class="font-semibold leading-none">{user()?.display_name}</div>
+          <div class="text-sm font-semibold leading-none text-neutral-400">
+            {
+              {
+                contestant: "versenyző",
+                organizer: "szervező",
+                school: "iskolai kapcsolattartó",
+              }[user()?.role ?? ""]
+            }
+          </div>
+        </div>
       </div>
-      <Button variant="outline">
-        <FiLogOut />
+      <Button variant="outline" disabled={loading()} onClick={handleLogout}>
+        <Show when={!loading()} fallback={<Spinner size={16} />}>
+          <FiLogOut />
+        </Show>
         Kijelentkezés
       </Button>
     </div>

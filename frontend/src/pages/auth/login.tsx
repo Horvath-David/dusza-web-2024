@@ -1,3 +1,4 @@
+import { useLocation } from "@solidjs/router";
 import { Component, createSignal, Show } from "solid-js";
 import { toast } from "solid-sonner";
 import { Spinner } from "~/components/Spinner";
@@ -13,6 +14,7 @@ import { useNavigate } from "~/router";
 
 export const Login: Component<{}> = () => {
   const navigate = useNavigate();
+  const loc = useLocation();
 
   const [loading, setLoading] = createSignal(false);
   const [username, setUsername] = createSignal("");
@@ -35,7 +37,8 @@ export const Login: Component<{}> = () => {
 
     if (res.ok) {
       toast.success("Sikeres bejelentkezés!");
-      window.location.pathname = "/"; //TODO: instead set user context
+      window.location.pathname =
+        (loc.state as { redirect_path?: string })?.redirect_path ?? "/"; //TODO: instead set user context
     } else {
       console.log(res);
     }

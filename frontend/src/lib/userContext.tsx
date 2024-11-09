@@ -10,6 +10,7 @@ import { UserData } from "./models";
 import { makeRequest } from "./api";
 import { useNavigate } from "~/router";
 import { useLocation } from "@solidjs/router";
+import { toast } from "solid-sonner";
 
 const UserContext = createContext<Accessor<UserData | undefined>>();
 
@@ -23,15 +24,24 @@ export const UserProvider = (props: ParentProps) => {
       status: string;
       error: string;
       user_data: UserData;
-      user_name: string;
     }>({
       endpoint: "/me/",
+      noErrorToast: true,
     });
-    if (!res.ok && !loc.pathname.startsWith("/auth")) {
-      navigate("/auth/login");
+
+    const shouldBeLoggedIn = localStorage.getItem("shouldBeLoggedIn") == "true";
+    if (!res.ok) {
+      if (loc.pathname.startsWith("/auth")) return;
+      if (shouldBeLoggedIn) toast.error("Nincs bejelentkezve!");
+      navigate("/auth/login", {
+        state: {
+          redirect_path: loc.pathname,
+        },
+      });
       return;
     }
     setUser(res.data?.user_data);
+    localStorage.setItem("shouldBeLoggedIn", "true");
   });
 
   return (
