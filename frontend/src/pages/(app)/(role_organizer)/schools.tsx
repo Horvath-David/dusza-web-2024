@@ -149,7 +149,6 @@ const Schools: Component<{}> = () => {
                     Intézmények megtekintése:
                 </h2>
                 <Table class="max-w-50">
-                    <TableCaption>Intézmények</TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Intézméynek</TableHead>

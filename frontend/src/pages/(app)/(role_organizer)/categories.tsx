@@ -86,7 +86,6 @@ const Categories: Component<{}> = () => {
         </form>
 
         <Table>
-          <TableCaption>Kategóriák</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Kategóriák</TableHead>

@@ -82,7 +82,6 @@ const ProgrammingLangs: Component<{}> = () => {
         </form>
 
         <Table>
-          <TableCaption>Programozási nyelvek</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Nyelvek</TableHead>
