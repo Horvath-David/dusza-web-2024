@@ -203,9 +203,9 @@ def all_team(request: WSGIRequest):
     user_data = UserData.objects.get(user=request.user)
 
     if user_data.role == "organizer":
-        teams = Team.objects.select_related('prog_lang', 'category', 'school').all()
+        teams = Team.objects.select_related('prog_lang', 'category', 'school').all().order_by("name")
     else:
-        teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(school=School.objects.get(communicator=request.user))
+        teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(school=School.objects.get(communicator=request.user)).order_by("name")
 
 
     teams_list = []
@@ -251,7 +251,7 @@ def get_by_status(request: WSGIRequest, status: str):
         }, status=403)
 
 
-    teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(status=status)
+    teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(status=status).order_by("name")
 
     teams_list = []
     for team in teams:
