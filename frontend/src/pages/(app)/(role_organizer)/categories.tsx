@@ -24,7 +24,6 @@ import {
   FaSolidCheck,
   FaSolidPlus,
   FaSolidTrashCan,
-  FaSolidX,
   FaSolidXmark,
 } from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
