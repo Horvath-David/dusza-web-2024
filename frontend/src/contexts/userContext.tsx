@@ -6,7 +6,7 @@ import {
   ParentProps,
   useContext,
 } from "solid-js";
-import { UserData } from "~/lib/models";
+import { Notification, UserData } from "~/lib/models";
 import { makeRequest } from "~/lib/api";
 import { useNavigate } from "~/router";
 import { useLocation } from "@solidjs/router";
