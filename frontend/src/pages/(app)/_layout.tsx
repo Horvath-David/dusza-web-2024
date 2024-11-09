@@ -1,4 +1,5 @@
 import { Component, createEffect, ParentProps, Show } from "solid-js";
+import { Sidebar } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
 import { useUser } from "~/lib/userContext";
 import { cn } from "~/lib/utils";
@@ -32,32 +33,3 @@ const AppLayout: Component<{}> = (props: ParentProps) => {
 };
 
 export default AppLayout;
-
-const Sidebar: Component<{}> = () => {
-  return (
-    <div class="flex flex-col gap-4 p-4">
-      <div class="flex justify-center gap-2">
-        <div class="aspect-square rounded-lg bg-gradient-to-tr from-purple-700 to-cyan-400 p-1 text-sm font-black">
-          DP
-        </div>
-        <div class="font-bold uppercase [letter-spacing:1.5px]">DuszaPanel</div>
-      </div>
-      <Hr padding="1rem" />
-    </div>
-  );
-};
-
-const Hr: Component<{ padding: string }> = (props: { padding: string }) => {
-  return (
-    <div
-      style={{
-        width: `calc(100%+2*${props.padding})`,
-        height: "1px",
-        "margin-left": "-" + props.padding,
-        "margin-right": "-" + props.padding,
-      }}
-      class="bg-border"
-      aria-hidden="true"
-    ></div>
-  );
-};

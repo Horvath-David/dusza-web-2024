@@ -1,6 +1,8 @@
 export interface UserData {
-  id: number;
-  user: number;
+  user_id: number;
+  user_data_id: number;
+  username: string;
+  display_name: string;
   role: string;
   grade?: number;
 }

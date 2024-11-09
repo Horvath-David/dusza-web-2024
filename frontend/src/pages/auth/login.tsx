@@ -9,7 +9,6 @@ import {
 } from "~/components/ui/text-field";
 import { makeRequest } from "~/lib/api";
 import { UserData } from "~/lib/models";
-import { setCurrentUser } from "~/lib/signals";
 import { useNavigate } from "~/router";
 
 export const Login: Component<{}> = () => {
@@ -36,8 +35,7 @@ export const Login: Component<{}> = () => {
 
     if (res.ok) {
       toast.success("Sikeres bejelentkezés!");
-      setCurrentUser(res.data?.user_data);
-      navigate("/");
+      window.location.pathname = "/"; //TODO: instead set user context
     } else {
       console.log(res);
     }
