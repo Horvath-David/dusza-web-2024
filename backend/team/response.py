@@ -68,7 +68,11 @@ def create_team(request: WSGIRequest):
             "status": "Error",
             "error": f"Nem találtam az általad megadott kategóriát az adatbázisomban",
         }, status=400)
-
+    if Team.objects.filter(owner=request.user).exists():
+        return JsonResponse({
+            "status": "Error",
+            "error": f"Korábban már regisztráltál csapatot. Ha másikat szeretnél regisztrálni, akkor inkább módosítsd adatokat.",
+        }, status=400)
     team = Team.objects.create(
         name=body["team_name"],
         owner=request.user,
@@ -102,6 +106,11 @@ def edit_team(request: WSGIRequest, team_id):
     if request.method == "DELETE":
         team = Team.objects.get(id=team_id)
         if user_object.role == "contestant":
+            if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
+                return JsonResponse({
+                    "status": "Error",
+                    "error": "Már lejárt a jelentkezési határidő, ezért a nevezésedet sem tudod visszavonni. Ha már nem kívéncs részt venni a versenyben, akkor kérlek vedd fel a kapcsolatot az egyik szervezővel",
+                }, status=403)
             if not Team.objects.filter(id=team_id).exists():
                 return JsonResponse({
                     "status": "Error",
@@ -153,6 +162,11 @@ def edit_team(request: WSGIRequest, team_id):
             "error": "Nincs jogusultságod, hogy végrehajtsd ezt a műveletet",
         }, status=403)
 
+    if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
+        return JsonResponse({
+            "status": "Error",
+            "error": "Már lejárt a jelentkezési határidő, ezért az adataidat sem tudod már módosítani",
+        }, status=403)
 
     try:
         body = json.loads(request.body)
@@ -203,9 +217,9 @@ def all_team(request: WSGIRequest):
     user_data = UserData.objects.get(user=request.user)
 
     if user_data.role == "organizer":
-        teams = Team.objects.select_related('prog_lang', 'category', 'school').all().order_by("name")
+        teams = Team.objects.select_related('prog_lang', 'category', 'school').all().order_by("status").order_by("name")
     else:
-        teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(school=School.objects.get(communicator=request.user)).order_by("name")
+        teams = Team.objects.select_related('prog_lang', 'category', 'school').filter(school=School.objects.get(communicator=request.user)).order_by("status").order_by("name")
 
 
     teams_list = []

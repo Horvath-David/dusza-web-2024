@@ -14,7 +14,7 @@ def require_role(role_list):
         def _wrapped_view(request, *args, **kwargs):
             user_data = UserData.objects.get(user=request.user)
             if user_data.role not in role_list:
-                return JsonResponse({"error": "You do not have access for this endpoint"}, status=403)
+                return JsonResponse({"error": "Nincs hozzáfárásed ehhez a végponthoz"}, status=403)
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
