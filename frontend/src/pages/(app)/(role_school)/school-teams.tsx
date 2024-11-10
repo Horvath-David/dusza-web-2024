@@ -1,4 +1,11 @@
-import { Component, createSignal, For, onMount, Show } from "solid-js";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Show,
+} from "solid-js";
 import {
   Dialog,
   DialogContent,
@@ -10,13 +17,15 @@ import {
 import { Button } from "~/components/ui/button";
 import { BsPeopleFill } from "solid-icons/bs";
 import {
+  FaSolidFile,
   FaSolidHourglassEnd,
   FaSolidPersonChalkboard,
   FaSolidSchool,
+  FaSolidTrashCan,
   FaSolidXmark,
 } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
-import { makeRequest } from "~/lib/api";
+import { API_URL, makeRequest } from "~/lib/api";
 import { Team } from "~/lib/models";
 import { toast } from "solid-sonner";
 import {
@@ -31,6 +40,7 @@ import { FiCode } from "solid-icons/fi";
 import { Badge } from "~/components/ui/badge";
 import { Hr } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
+import { FileUploader } from "~/components/FileUploader";
 
 async function getTeams() {
   const res = await makeRequest<{
@@ -46,24 +56,23 @@ async function getTeams() {
 const Teams: Component<{}> = () => {
   const [allTeamInfo, setAllTeamInfo] = createSignal<Team[]>([]);
 
-  const [approving, setApproving] = createSignal(false);
+  const [deleting, setDeleting] = createSignal(false);
 
   onMount(async () => {
     setAllTeamInfo(await getTeams());
   });
 
-  async function approveTeam(id: number) {
-    setApproving(true);
+  async function handleDelete(team: Team) {
+    setDeleting(true);
     const res = await makeRequest({
-      method: "POST",
-      endpoint: `/team/${id}/change_status/approved_by_organizer`,
-      body: {},
+      endpoint: `/team/${team.id}/manage`,
+      method: "DELETE",
     });
     if (res.ok) {
-      toast.success("Sikeres státusz változtatás");
+      toast.success("Sikeres törlés");
+      setAllTeamInfo(allTeamInfo().filter((x) => x.id !== team.id));
     }
-    toast.warning("Még nincs kész a feltöltős dolog");
-    setApproving(false);
+    setDeleting(false);
   }
 
   return (
@@ -104,140 +113,234 @@ const Teams: Component<{}> = () => {
                 </div>
                 {(() => {
                   const [open, setOpen] = createSignal(false);
+                  const [image, setImage] = createSignal("");
+                  const [imageOpen, setImageOpen] = createSignal(false);
+                  const [status, setStatus] = createSignal("");
+
+                  createEffect(async () => {
+                    if (open()) {
+                      setStatus(team.status);
+                      console.log(team.status);
+                      if (team.status !== "registered") {
+                        const res = await makeRequest({
+                          endpoint: `/file/get/team/${team.id}`,
+                        });
+                        if (res.ok) {
+                          console.log(res.data);
+                          setImage(
+                            `${API_URL}/file/get/${res?.data?.files?.at(0)}`,
+                          );
+                        }
+                      }
+                    }
+                  });
 
                   return (
-                    <Dialog open={open()} onOpenChange={setOpen}>
-                      <DialogTrigger class="ml-auto">
-                        <Button variant="secondary">Kezelés</Button>
-                      </DialogTrigger>
-                      <DialogContent noDefaultCloseButton={true} class="py-4">
-                        <DialogHeader class="flex-row items-center">
-                          <DialogTitle class="text-xl">
-                            {team.name} adatai
-                          </DialogTitle>
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            class="-mr-2 ml-auto"
-                            onClick={() => setOpen(false)}
-                          >
-                            <FaSolidXmark
-                              size={20}
-                              class="text-muted-foreground"
-                            />
-                          </Button>
-                        </DialogHeader>
-                        <Hr padding="1.5rem" />
-                        <div class="flex flex-col gap-0.5">
-                          <div class="flex items-center gap-2 font-semibold">
-                            <FaSolidSchool />
-                            <span class="line-clamp-2 break-words">
-                              Iskola neve
-                            </span>
-                          </div>
-                          {team.school.name}
-                        </div>
-
-                        <div class="grid w-full grid-cols-2 gap-4">
-                          <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center gap-2 font-semibold">
-                              <BiRegularCategoryAlt />
-                              <span class="line-clamp-2 break-words">
-                                Kategória
-                              </span>
-                            </div>
-                            {team.category.name}
-                          </div>
-                          <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center gap-2 font-semibold">
-                              <FiCode />
-                              <span class="line-clamp-2 break-words">
-                                Programnyelv
-                              </span>
-                            </div>
-                            {team.prog_lang.name}
-                          </div>
-                        </div>
-
-                        <div class="flex flex-col gap-0.5">
-                          <div class="flex items-center gap-2 font-semibold">
-                            <BsPeopleFill />
-                            <span class="line-clamp-2 break-words">
-                              Csapattagok
-                            </span>
-                          </div>
-                          {team.members
-                            .map((x) => `${x.name} (${x.grade}.)`)
-                            .join(", ") +
-                            (team.supplementary_members?.at(0)?.name
-                              ? ", " +
-                                team.supplementary_members
-                                  ?.map((x) => `${x.name} (${x.grade}. - pót)`)
-                                  .at(0)
-                              : "")}
-                        </div>
-
-                        <div class="grid w-full grid-cols-2 gap-4">
-                          <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center gap-2 font-semibold">
-                              <FaSolidPersonChalkboard />
-                              <span class="line-clamp-2 break-words">
-                                Felkészítő tanár
-                              </span>
-                            </div>
-                            {team.teacher_name}
-                          </div>
-                          <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center gap-2 font-semibold">
-                              <FaSolidHourglassEnd />
-                              <span class="line-clamp-2 break-words">
-                                Állapot
-                              </span>
-                            </div>
-                            <Badge
-                              class="mt-1 w-fit"
-                              variant={
-                                {
-                                  registered: "secondary",
-                                  approved_by_organizer: "green",
-                                  approved_by_school: "yellow",
-                                }[team.status] as
-                                  | "secondary"
-                                  | "green"
-                                  | "yellow"
-                              }
+                    <>
+                      <Dialog open={open()} onOpenChange={setOpen}>
+                        <DialogTrigger class="ml-auto">
+                          <Button variant="secondary">Kezelés</Button>
+                        </DialogTrigger>
+                        <DialogContent
+                          noDefaultCloseButton={true}
+                          class="overflow-hidden py-4"
+                        >
+                          <DialogHeader class="flex-row items-center">
+                            <DialogTitle class="text-xl">
+                              {team.name} adatai
+                            </DialogTitle>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              class="-mr-2 ml-auto"
+                              onClick={() => setOpen(false)}
                             >
-                              {
-                                {
-                                  registered: "iskolai jóváhagyásra vár",
-                                  approved_by_organizer: "jóváhagyva",
-                                  approved_by_school:
-                                    "szervezői jóváhagyásra vár",
-                                }[team.status]
-                              }
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <Show when={team.status === "registered"}>
+                              <FaSolidXmark
+                                size={20}
+                                class="text-muted-foreground"
+                              />
+                            </Button>
+                          </DialogHeader>
                           <Hr padding="1.5rem" />
-                          <DialogFooter class="-mx-2 flex-col gap-4">
+                          <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2 font-semibold">
+                              <FaSolidSchool />
+                              <span class="line-clamp-2 break-words">
+                                Iskola neve
+                              </span>
+                            </div>
+                            {team.school.name}
+                          </div>
+
+                          <div class="grid w-full grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-0.5">
+                              <div class="flex items-center gap-2 font-semibold">
+                                <BiRegularCategoryAlt />
+                                <span class="line-clamp-2 break-words">
+                                  Kategória
+                                </span>
+                              </div>
+                              {team.category.name}
+                            </div>
+                            <div class="flex flex-col gap-0.5">
+                              <div class="flex items-center gap-2 font-semibold">
+                                <FiCode />
+                                <span class="line-clamp-2 break-words">
+                                  Programnyelv
+                                </span>
+                              </div>
+                              {team.prog_lang.name}
+                            </div>
+                          </div>
+
+                          <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-2 font-semibold">
+                              <BsPeopleFill />
+                              <span class="line-clamp-2 break-words">
+                                Csapattagok
+                              </span>
+                            </div>
+                            {team.members
+                              .map((x) => `${x.name} (${x.grade}.)`)
+                              .join(", ") +
+                              (team.supplementary_members?.at(0)?.name
+                                ? ", " +
+                                  team.supplementary_members
+                                    ?.map(
+                                      (x) => `${x.name} (${x.grade}. - pót)`,
+                                    )
+                                    .at(0)
+                                : "")}
+                          </div>
+
+                          <div class="grid w-full grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-0.5">
+                              <div class="flex items-center gap-2 font-semibold">
+                                <FaSolidPersonChalkboard />
+                                <span class="line-clamp-2 break-words">
+                                  Felkészítő tanár
+                                </span>
+                              </div>
+                              {team.teacher_name}
+                            </div>
+                            <div class="flex flex-col gap-0.5">
+                              <div class="flex items-center gap-2 font-semibold">
+                                <FaSolidHourglassEnd />
+                                <span class="line-clamp-2 break-words">
+                                  Állapot
+                                </span>
+                              </div>
+                              <Badge
+                                class="mt-1 w-fit"
+                                variant={
+                                  {
+                                    registered: "secondary",
+                                    approved_by_organizer: "green",
+                                    approved_by_school: "yellow",
+                                  }[team.status] as
+                                    | "secondary"
+                                    | "green"
+                                    | "yellow"
+                                }
+                              >
+                                {
+                                  {
+                                    registered: "iskolai jóváhagyásra vár",
+                                    approved_by_organizer: "jóváhagyva",
+                                    approved_by_school:
+                                      "szervezői jóváhagyásra vár",
+                                  }[team.status]
+                                }
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <Hr padding="1.5rem" />
+                          <DialogFooter class="-mx-2 flex-row gap-4">
+                            <Button
+                              variant="destructive"
+                              class="flex-1"
+                              onClick={() => handleDelete(team)}
+                              disabled={deleting()}
+                            >
+                              <Show when={!deleting()} fallback={<Spinner />}>
+                                <FaSolidTrashCan />
+                              </Show>
+                              Törlés
+                            </Button>
+                            <Show when={status() !== "registered"}>
+                              <Button
+                                variant="default"
+                                class="flex-1"
+                                onClick={() => setImageOpen(true)}
+                              >
+                                <FaSolidFile />
+                                Jelentkezési lap
+                              </Button>
+                            </Show>
+                            <Show when={status() === "registered"}>
+                              <FileUploader
+                                uid="reg-document"
+                                onComplete={(url) => {
+                                  setImage(url);
+                                  setImageOpen(true);
+                                  setStatus("approved_by_school");
+                                }}
+                                team={team.id}
+                                class="flex-1"
+                              >
+                                <Button variant="default" class="w-full">
+                                  <FaSolidCheck />
+                                  Jóváhagyás
+                                </Button>
+                              </FileUploader>
+                            </Show>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={imageOpen()} onOpenChange={setImageOpen}>
+                        <DialogContent
+                          noDefaultCloseButton={true}
+                          class="h-[calc(100vh-3rem)] max-w-[calc(100vw-3rem)] overflow-hidden py-4"
+                        >
+                          <DialogHeader class="flex-row items-center">
+                            <DialogTitle class="text-xl">
+                              {team.name} jelentkezési lapja
+                            </DialogTitle>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              class="-mr-2 ml-auto"
+                              onClick={() => setImageOpen(false)}
+                            >
+                              <FaSolidXmark
+                                size={20}
+                                class="text-muted-foreground"
+                              />
+                            </Button>
+                          </DialogHeader>
+                          <Hr padding="1.5rem" />
+
+                          <img
+                            src={image()}
+                            alt={`${team.name} jelentkezési lapja`}
+                            class="mx-auto max-h-[70vh]"
+                          />
+
+                          <Hr padding="1.5rem" />
+                          <DialogFooter class="-mx-2 flex gap-4">
                             <Button
                               variant="default"
-                              onClick={() => {
-                                approveTeam(team.id);
-                              }}
-                              disabled={approving()}
+                              onClick={() => setImageOpen(false)}
                             >
-                              <Show when={!approving()} fallback={<Spinner />}>
-                                <FaSolidCheck />
-                              </Show>
-                              Jóváhagyás
+                              <FaSolidXmark />
+                              Bezárás
                             </Button>
                           </DialogFooter>
-                        </Show>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogContent>
+                      </Dialog>
+                    </>
                   );
                 })()}
               </CardHeader>

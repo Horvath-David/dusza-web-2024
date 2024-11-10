@@ -29,6 +29,7 @@ import { Label } from "~/components/ui/label";
 import { toast } from "solid-sonner";
 import { Spinner } from "~/components/Spinner";
 import { useNavigate } from "~/router";
+import { useMe } from "~/contexts/userContext";
 
 async function getProgLangs() {
   const res = await makeRequest<{
@@ -65,6 +66,7 @@ async function getSchool() {
 
 const NewTeam: Component<{}> = () => {
   const navigate = useNavigate();
+  const [_, { refetch }] = useMe();
 
   const [teamName, setTeamName] = createSignal("");
 
@@ -136,6 +138,7 @@ const NewTeam: Component<{}> = () => {
 
     if (res.ok) {
       toast.success("Csapat sikeresen létrehozva!");
+      await refetch();
       //TODO: set context user team_id
       navigate("/edit-team");
     }
