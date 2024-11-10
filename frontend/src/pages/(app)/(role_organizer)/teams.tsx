@@ -44,7 +44,7 @@ import { Spinner } from "~/components/Spinner";
 
 const FILTER_REG: FilterOptions[] = [
   { id: "", name: "Összes" },
-  { id: "registered", name: "Registrált" },
+  { id: "registered", name: "Regisztrált" },
   { id: "approved_by_school", name: "Jóváhagyásra vár" },
   { id: "approved_by_organizer", name: "Jóváhagyott" },
 ];

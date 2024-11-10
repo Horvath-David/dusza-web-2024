@@ -16,6 +16,7 @@ const SchoolInfo: Component<{}> = () => {
   const [newUsername, setNewUsername] = createSignal("");
   const [newSchoolName, setNewSchoolName] = createSignal("");
   const [newSchoolAddress, setNewSchoolAddress] = createSignal("");
+  const [newEmail, setNewEmail] = createSignal("");
   const [saving, setSaving] = createSignal(false);
 
   const [me, { refetch }] = useMe();
@@ -23,6 +24,7 @@ const SchoolInfo: Component<{}> = () => {
   onMount(() => {
     setNewDisplayName(me()?.user_data?.display_name ?? "");
     setNewUsername(me()?.user_data?.username ?? "");
+    setNewEmail(me()?.user_data?.email ?? "")
     setNewSchoolName(me()?.school?.name ?? "");
     setNewSchoolAddress(me()?.school?.address ?? "");
   });
@@ -40,8 +42,10 @@ const SchoolInfo: Component<{}> = () => {
         school_name: newSchoolName(),
         address: newSchoolAddress(),
         display_name: newDisplayName(),
+        email: newEmail(),
       },
     });
+
 
     if (res.ok) {
       toast.success("Sikeres mentés!");
@@ -68,7 +72,7 @@ const SchoolInfo: Component<{}> = () => {
             onChange={setNewSchoolName}
             required
           >
-            <TextFieldLabel>Iskola neve:</TextFieldLabel>
+            <TextFieldLabel>Intézmény neve:</TextFieldLabel>
             <TextFieldInput type="text"></TextFieldInput>
           </TextField>
           <TextField
@@ -77,7 +81,7 @@ const SchoolInfo: Component<{}> = () => {
             onChange={setNewSchoolAddress}
             required
           >
-            <TextFieldLabel>Iskola címe:</TextFieldLabel>
+            <TextFieldLabel>Intézmény címe:</TextFieldLabel>
             <TextFieldInput type="text"></TextFieldInput>
           </TextField>
           <TextField
@@ -86,7 +90,7 @@ const SchoolInfo: Component<{}> = () => {
             onChange={setNewUsername}
             required
           >
-            <TextFieldLabel>Iskola felhasználó neve:</TextFieldLabel>
+            <TextFieldLabel>Intézmény felhasználó neve:</TextFieldLabel>
             <TextFieldInput type="text"></TextFieldInput>
           </TextField>
           <TextField
@@ -95,8 +99,17 @@ const SchoolInfo: Component<{}> = () => {
             onChange={setNewDisplayName}
             required
           >
-            <TextFieldLabel>Kapcsolat tartó neve:</TextFieldLabel>
+            <TextFieldLabel>Kapcsolattartó neve:</TextFieldLabel>
             <TextFieldInput type="text"></TextFieldInput>
+          </TextField>
+          <TextField
+            class="max-w-full"
+            value={newEmail()}
+            onChange={setNewEmail}
+            required
+          >
+            <TextFieldLabel>Kapcsolattartó email címe:</TextFieldLabel>
+            <TextFieldInput type="email"></TextFieldInput>
           </TextField>
           <Button class="mb-4 mt-6 w-full" type="submit">
             <Show when={!saving()} fallback={<Spinner />}>
