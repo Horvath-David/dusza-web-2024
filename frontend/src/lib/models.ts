@@ -39,7 +39,7 @@ export interface Category {
 export interface School {
   id: number;
   name: string;
-  adress: string;
+  address: string;
 }
 
 export interface DetailedShool {

@@ -97,6 +97,12 @@ function getRouteData(path: string): RouteData {
       return {
         title: "Csapatok",
         icon: AiOutlineTeam,
+        order: 2,
+      };
+    case "/edit-school-info":
+      return {
+        title: "Adatok módosítása",
+        icon:  FaSolidPen,
         order: 1,
       };
 
