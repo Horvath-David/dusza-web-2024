@@ -59,3 +59,35 @@ export interface Notification {
   text: string;
   manual_delete_enabled: boolean;
 }
+
+
+export interface FilterOptions {
+  id: string;
+  name: string;
+}
+
+export interface Statics{
+  number_of_shools: number;
+  number_of_teams: number;
+  number_of_teams_per_schools: TeamsPerSchools[];
+  number_of_teams_per_status: TeamsPerStatus[];
+  number_of_teams_per_category: TeamsPerCategory[];
+  number_of_teams_per_prog_lang: TeamsPerProgLang[];
+}
+
+export interface TeamsPerSchools {
+  school__name: string;
+  team_count: number;
+}
+export interface TeamsPerStatus {
+  status: string;
+  team_count: number;
+}
+export interface TeamsPerCategory {
+  category: string;
+  team_count: number;
+}
+export interface TeamsPerProgLang{
+  prog_lang__name: string;
+  team_count: number;
+}

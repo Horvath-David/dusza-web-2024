@@ -15,6 +15,7 @@ export type Path =
   | `/new-team`
   | `/school-teams`
   | `/schools`
+  | `/statistics`
   | `/teams`;
 
 export type Params = {};

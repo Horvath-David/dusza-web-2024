@@ -20,7 +20,7 @@ import {
 } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
-import { Team } from "~/lib/models";
+import { FilterOptions, Team } from "~/lib/models";
 import { toast } from "solid-sonner";
 import {
   Card,
@@ -29,11 +29,21 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { BiRegularCategoryAlt } from "solid-icons/bi";
 import { FiCode } from "solid-icons/fi";
 import { Badge } from "~/components/ui/badge";
 import { Hr } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
+
+
+const FILTER_REG: FilterOptions[]= [
+  {id:"", name:"Összes"},
+  {id:"registered", name:"Registrált"},
+  {id:"approved_by_school", name:"Jóváhagyásra vár"},
+  {id:"approved_by_organizer", name:"Jóváhagyott"},
+]
+
 
 async function getTeams() {
   const res = await makeRequest<{
@@ -77,6 +87,8 @@ const Teams: Component<{}> = () => {
   const [alerting, setAlerting] = createSignal(false);
   const [deleting, setDeleting] = createSignal(false);
   const [approving, setApproving] = createSignal(false);
+
+  const [filterByRegistry, setFilterByregistry] = createSignal<FilterOptions>({id:"", name:""})
 
   onMount(async () => {
     setLoading(true);
@@ -164,8 +176,26 @@ const Teams: Component<{}> = () => {
       <h1 class="my-8 text-2xl font-semibold">Csapatok</h1>
 
       <Show when={!loading()} fallback={<Spinner class="mt-12" />}>
+       
         <div class="grid w-full max-w-3xl grid-cols-1 gap-4">
-          <For each={allTeamInfo()}>
+          <Select<FilterOptions> options={FILTER_REG}
+              placeholder="Szűrés"
+              optionValue="id"
+              optionTextValue="name"
+              
+              class="w-full"
+              value={filterByRegistry()}
+              onChange={setFilterByregistry}
+              itemComponent={(props) => (
+                <SelectItem item={props.item}>
+                  {props.item.rawValue.name}</SelectItem>
+              )}>
+                 <SelectTrigger class="w-48">
+              <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
+          <For each={allTeamInfo().filter(x=>(filterByRegistry()?.id==="" ? ["registered", "approved_by_school", "approved_by_organizer"]:[filterByRegistry()?.id]).includes(x.status))}>
             {(team) => (
               <Card>
                 <CardHeader class="flex-row items-center border-b py-4">

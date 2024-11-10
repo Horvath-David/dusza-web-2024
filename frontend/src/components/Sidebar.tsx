@@ -19,6 +19,7 @@ import { FaRegularFileCode } from "solid-icons/fa";
 import { FaSolidSchoolFlag } from "solid-icons/fa";
 import { BiRegularCategoryAlt } from "solid-icons/bi";
 import { AiOutlineTeam } from "solid-icons/ai";
+import { AiOutlineLineChart } from 'solid-icons/ai'
 import { useLocation } from "@solidjs/router";
 import { Branding } from "./Branding";
 import { TbSettings } from "solid-icons/tb";
@@ -83,6 +84,13 @@ function getRouteData(path: string): RouteData {
         title: "Konfiguráció",
         icon: TbSettings,
         order: 5,
+      };
+    
+    case "/statistics":
+      return {
+        title:"Statisztikák",
+        icon: AiOutlineLineChart,
+        order:6,
       };
 
     case "/school-teams":
