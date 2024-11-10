@@ -41,6 +41,7 @@ import { FiCode } from "solid-icons/fi";
 import { Badge } from "~/components/ui/badge";
 import { Hr } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
+import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
 
 const FILTER_REG: FilterOptions[] = [
   { id: "", name: "Összes" },
@@ -92,6 +93,9 @@ const Teams: Component<{}> = () => {
   const [deleting, setDeleting] = createSignal(false);
   const [approving, setApproving] = createSignal(false);
 
+  const [secondDialog, setSecondDialog] = createSignal(false);
+  const [warningDialog, setWarningDialog] = createSignal("")
+
   const [filterByRegistry, setFilterByregistry] = createSignal<FilterOptions>({
     id: "",
     name: "",
@@ -108,6 +112,9 @@ const Teams: Component<{}> = () => {
     const res = await makeRequest({
       method: "POST",
       endpoint: `/team/${id}/request_info_fix`,
+      body: {
+        text: warningDialog()
+      },
       noErrorToast: true,
     });
     if (res.status === 304) {
@@ -120,8 +127,11 @@ const Teams: Component<{}> = () => {
       });
     } else {
       toast.success("Sikeres üzenet küldés");
+      setSecondDialog(false);
+      setWarningDialog("");
     }
     setAlerting(false);
+ 
   }
 
   async function approveTeam(id: number) {
@@ -179,6 +189,7 @@ const Teams: Component<{}> = () => {
     );
     saveCsv("csapatok.csv", csv);
   }
+
 
   return (
     <div class="mx-auto flex flex-col items-center gap-4">
@@ -252,7 +263,44 @@ const Teams: Component<{}> = () => {
                         <DialogTrigger class="ml-auto">
                           <Button variant="secondary">Kezelés</Button>
                         </DialogTrigger>
+                        <Show when={!secondDialog()} fallback={
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle class="text-xl">Éretsítés Küldése</DialogTitle>
+                            </DialogHeader>
+                            <div class="max-h-72">
+                              <TextField class="max-w-full max-h-72" value={warningDialog()} onChange={setWarningDialog} >
+                                <TextFieldTextArea placeholder="Ide írd a panaszod...">
+                                
+                                </TextFieldTextArea>
+                              </TextField>
+
+                            </div>
+                            <DialogFooter>
+                            <div class="flex w-full gap-4">
+                            <Button
+                                variant="warning"
+                                class="flex-1"
+                                onClick={() => {
+                                  alertTeam(team.id);
+                                
+                                }}
+                                disabled={alerting()}
+                              >
+                                <Show when={!alerting()} fallback={<Spinner />}>
+                                  <FaSolidPen />
+                                </Show>
+                                Módosítás kérése
+                              </Button>
+                              <Button onclick={()=>{setSecondDialog(false)}} variant="secondary">
+                                  Mégse
+                              </Button>
+                              </div>
+                            </DialogFooter>
+                          </DialogContent>
+                        }>
                         <DialogContent noDefaultCloseButton={true} class="py-4">
+                         
                           <DialogHeader class="flex-row items-center">
                             <DialogTitle class="text-xl">
                               {team.name} adatai
@@ -269,6 +317,7 @@ const Teams: Component<{}> = () => {
                               />
                             </Button>
                           </DialogHeader>
+
                           <Hr padding="1.5rem" />
                           <div class="flex flex-col gap-0.5">
                             <div class="flex items-center gap-2 font-semibold">
@@ -362,7 +411,7 @@ const Teams: Component<{}> = () => {
                           <Hr padding="1.5rem" />
                           <DialogFooter class="-mx-2 flex-col gap-4">
                             <div class="flex w-full gap-4">
-                              <Button
+                              {/* <Button
                                 variant="warning"
                                 class="flex-1"
                                 onClick={() => {
@@ -373,6 +422,10 @@ const Teams: Component<{}> = () => {
                                 <Show when={!alerting()} fallback={<Spinner />}>
                                   <FaSolidPen />
                                 </Show>
+                                Módosítás kérése
+                              </Button> */}
+                              <Button variant="warning" onClick={()=>{setSecondDialog(true)}} class="flex-1">
+                                  <FaSolidPen />
                                 Módosítás kérése
                               </Button>
                               <Button
@@ -408,6 +461,7 @@ const Teams: Component<{}> = () => {
                             </Show>
                           </DialogFooter>
                         </DialogContent>
+                        </Show>
                       </Dialog>
                     );
                   })()}
