@@ -71,7 +71,7 @@ def register(request: WSGIRequest):
                 "error": "Egy vagy több mező hiányos",
             }, status=400)
 
-    user = User.objects.create(
+    user = User.objects.create_user(
         username=data["username"],
         password=data["password"],
     )

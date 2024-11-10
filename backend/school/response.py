@@ -59,7 +59,7 @@ def create_school(request: WSGIRequest):
             "error": "Hibás kérés",
         }, status=400)
     try:
-        communicator = User.objects.create(
+        communicator = User.objects.create_user(
             username=body['username'],
             email=body['email'],
             password=body['password'],
