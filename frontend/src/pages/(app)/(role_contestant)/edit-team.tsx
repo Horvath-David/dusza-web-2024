@@ -1,4 +1,11 @@
-import { Component, createEffect, createSignal, For, onMount, Show } from "solid-js";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Show,
+} from "solid-js";
 import {
   TextField,
   TextFieldLabel,
@@ -16,7 +23,7 @@ import {
 } from "~/components/ui/combobox.tsx";
 import { Button } from "~/components/ui/button.tsx";
 import { makeRequest } from "~/lib/api";
-import { Category, ProgrammingLanguage, School, Team } from "~/lib/models";
+import { Category, ProgrammingLanguage, Team } from "~/lib/models";
 import {
   NumberField,
   NumberFieldDecrementTrigger,
@@ -28,10 +35,9 @@ import {
 import { Label } from "~/components/ui/label";
 import { Spinner } from "~/components/Spinner";
 import { toast } from "solid-sonner";
-import { useNotifications, useUser } from "~/contexts/userContext";
+import { useNotifications, useRefetch, useUser } from "~/contexts/userContext";
 import { FaSolidFloppyDisk } from "solid-icons/fa";
 import { Callout, CalloutContent, CalloutTitle } from "~/components/ui/callout";
-
 
 async function getProgLangs() {
   const res = await makeRequest<{
@@ -55,19 +61,9 @@ async function getCategory() {
   return res.data?.list ?? [];
 }
 
-async function getSchool() {
-  const res = await makeRequest<{
-    status: string;
-    error?: string;
-    list: School[];
-  }>({
-    endpoint: "/school/all",
-  });
-  return res.data?.list ?? [];
-}
-
 const NewTeam: Component<{}> = () => {
-  const user = useUser()!;
+  const user = useUser();
+  const refetch = useRefetch();
 
   const [teamName, setTeamName] = createSignal("");
 
@@ -82,11 +78,9 @@ const NewTeam: Component<{}> = () => {
 
   const [teacher, setTeacher] = createSignal("");
 
-  const [allSchool, setAllSchool] = createSignal<School[]>([]);
   const [allCategory, setAllCategory] = createSignal<Category[]>([]);
   const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
 
-  const [school, setSchool] = createSignal<School>();
   const [category, setCategory] = createSignal<Category>();
   const [programmingLang, setProgrammingLang] =
     createSignal<ProgrammingLanguage>();
@@ -99,7 +93,6 @@ const NewTeam: Component<{}> = () => {
 
   onMount(async () => {
     setLoading(true);
-    setAllSchool(await getSchool());
     setAllCategory(await getCategory());
     setAllProgLang(await getProgLangs());
 
@@ -124,27 +117,22 @@ const NewTeam: Component<{}> = () => {
     setSubstitudeTeamMateGrade(team?.supplementary_members?.at(0)?.grade ?? 8);
     setTeacher(team?.teacher_name ?? "");
 
-    setSchool(team?.school);
     setCategory(team?.category);
     setProgrammingLang(team?.prog_lang);
 
     setLoading(false);
   });
-  
-  createEffect(() =>{
-    if(notifications()[0] !== undefined) {
-        setNotify(true);
-        console.log(notifications()[0])
+
+  createEffect(() => {
+    if (notifications()[0] !== undefined) {
+      setNotify(true);
+      console.log(notifications()[0]);
     }
-  })
+  });
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
 
-    if (!school()) {
-      toast.error("Hibás iskola!");
-      return;
-    }
     if (!category()) {
       toast.error("Hibás kategória!");
       return;
@@ -161,7 +149,7 @@ const NewTeam: Component<{}> = () => {
       method: "PATCH",
       body: {
         name: teamName(),
-        school: school()?.id,
+        // school: school()?.id,
         members: [
           {
             name: teamMateOneName(),
@@ -190,6 +178,7 @@ const NewTeam: Component<{}> = () => {
 
     if (res.ok) {
       toast.success("Sikeres mentés!");
+      refetch();
     }
 
     setSaving(false);
@@ -203,17 +192,16 @@ const NewTeam: Component<{}> = () => {
       <h1 class="my-8 text-2xl font-semibold">Csapat szerkesztése</h1>
 
       <Show when={!loading()} fallback={<Spinner />}>
-      <Show when={notify()}>
-        <Callout variant="warning">
-          <CalloutTitle>{notifications()[0].title}</CalloutTitle>
-           <CalloutContent>
-            <For each={notifications()[0].text.split("\n")}>{
-            (noty) => (
-              <p>{noty}</p>
-            )
-            }</For></CalloutContent>
-        </Callout>
-      </Show>
+        <Show when={notify()}>
+          <Callout variant="warning">
+            <CalloutTitle>{notifications()[0].title}</CalloutTitle>
+            <CalloutContent>
+              <For each={notifications()[0].text.split("\n")}>
+                {(noty) => <p>{noty}</p>}
+              </For>
+            </CalloutContent>
+          </Callout>
+        </Show>
         <TextField
           class="max-w-full"
           value={teamName()}
@@ -336,31 +324,7 @@ const NewTeam: Component<{}> = () => {
           <TextFieldLabel>Felkészítő tanár neve: </TextFieldLabel>
           <TextFieldInput type="text" />
         </TextField>
-        {/* School selection */}
-        <Combobox<School>
-          required
-          options={allSchool()}
-          optionValue="id"
-          optionTextValue="name"
-          optionLabel="name"
-          placeholder="Válassz iskolát..."
-          class="w-full"
-          value={school()}
-          onChange={(val) => setSchool(val || undefined)}
-          itemComponent={(props) => (
-            <ComboboxItem item={props.item}>
-              <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
-              <ComboboxItemIndicator />
-            </ComboboxItem>
-          )}
-        >
-          <Label class="mb-1.5 block">Csapat iskolája:</Label>
-          <ComboboxControl>
-            <ComboboxInput />
-            <ComboboxTrigger />
-          </ComboboxControl>
-          <ComboboxContent />
-        </Combobox>
+
         {/* Category selection */}
         <Combobox<Category>
           required
@@ -386,6 +350,7 @@ const NewTeam: Component<{}> = () => {
           </ComboboxControl>
           <ComboboxContent />
         </Combobox>
+
         {/* Language selection */}
         <Combobox<ProgrammingLanguage>
           required
