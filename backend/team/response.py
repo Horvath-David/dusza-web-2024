@@ -86,6 +86,8 @@ def create_team(request: WSGIRequest):
     )
     team.save()
 
+    Notification.objects.filter(recipient=request.user).delete()
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
@@ -223,6 +225,8 @@ def edit_team(request: WSGIRequest, team_id):
                  f"\nDusza panel",
         )
         i.delete()
+
+    Notification.objects.filter(recipient=request.user).delete()
 
     return JsonResponse({
         "status": "Ok",
