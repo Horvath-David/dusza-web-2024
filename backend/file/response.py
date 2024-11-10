@@ -46,10 +46,10 @@ def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
                     "status": "Error",
                     "error": "Csak képet tölthetsz fel. A folyamatot megszakítottam",
                 }, status=403)
-            file_name = f"Registration document for team no{team_id}"
+            file_name = f"Registration document for team no{team_id}.{file.name.split('.')[-1]}"
             File.objects.create(
                 name=file_name,
-                path='files/' + file_name+file.name.split('.')[-1],
+                path='files/' + file_name,
                 file_type='image',
                 owner=request.user,
                 team=team
