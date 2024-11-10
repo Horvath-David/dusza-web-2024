@@ -54,7 +54,7 @@ def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
                 owner=request.user,
                 team=team
             )
-            with open('files/' + file_name+file.name.split('.')[-1], 'wb+') as destination:
+            with open('files/' + file_name, 'wb+') as destination:
                 for chunk in file.chunks():
                     destination.write(chunk)
                     destination.flush()
