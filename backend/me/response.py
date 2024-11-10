@@ -95,7 +95,7 @@ def user_info(request: WSGIRequest):
         "user_data": get_extended_user_data(request.user),
         "notifications": [model_to_dict(i, fields=["id", "title", "text", "manual_delete_enabled"])
                           for i in Notification.objects.filter(recipient=request.user)],
-        "school": model_to_dict(School.objects.get(communicator=request.user), fields=["name", "address"])
+        "school": model_to_dict(School.objects.get(communicator=request.user), fields=["name", "address", "id"])
     }, status=200)
 
 
