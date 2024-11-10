@@ -35,7 +35,7 @@ import {
 import { Label } from "~/components/ui/label";
 import { Spinner } from "~/components/Spinner";
 import { toast } from "solid-sonner";
-import { useNotifications, useUser } from "~/contexts/userContext";
+import { useNotifications, useRefetch, useUser } from "~/contexts/userContext";
 import { FaSolidFloppyDisk } from "solid-icons/fa";
 import { Callout, CalloutContent, CalloutTitle } from "~/components/ui/callout";
 
@@ -62,7 +62,8 @@ async function getCategory() {
 }
 
 const NewTeam: Component<{}> = () => {
-  const user = useUser()!;
+  const user = useUser();
+  const refetch = useRefetch();
 
   const [teamName, setTeamName] = createSignal("");
 
@@ -177,6 +178,7 @@ const NewTeam: Component<{}> = () => {
 
     if (res.ok) {
       toast.success("Sikeres mentés!");
+      refetch();
     }
 
     setSaving(false);
