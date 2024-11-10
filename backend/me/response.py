@@ -1,4 +1,5 @@
 import json
+from collections import UserDict
 from json import JSONDecodeError
 
 from django.contrib.auth import authenticate
@@ -8,7 +9,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
-from api.models import Notification
+from api.models import Notification, UserData, School
 from me.utils import get_extended_user_data
 from modules import django_model_operations
 
@@ -78,11 +79,23 @@ def change_password(request: WSGIRequest):
 @login_required
 @require_GET
 def user_info(request: WSGIRequest):
+    user_data = UserData.objects.get(user=request.user)
+    if user_data.role != "school:":
+        return JsonResponse({
+            "status": "Ok",
+            "error": None,
+            "user_data": get_extended_user_data(request.user),
+            "notifications": [model_to_dict(i, fields=["id", "title", "text", "manual_delete_enabled"])
+                              for i in Notification.objects.filter(recipient=request.user)],
+        }, status=200)
+
     return JsonResponse({
         "status": "Ok",
         "error": None,
         "user_data": get_extended_user_data(request.user),
-        "notifications": [model_to_dict(i, fields=["id", "title", "text", "manual_delete_enabled"]) for i in Notification.objects.filter(recipient=request.user)]
+        "notifications": [model_to_dict(i, fields=["id", "title", "text", "manual_delete_enabled"])
+                          for i in Notification.objects.filter(recipient=request.user)],
+        "school": model_to_dict(School.objects.get(communicator=request.user, fields=["name", "address"]))
     }, status=200)
 
 
