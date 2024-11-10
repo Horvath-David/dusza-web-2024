@@ -155,9 +155,14 @@ def manage_school(request: WSGIRequest, school_id):
         user_data.display_name = body["display_name"]
     user_data.save()
 
+    school_obj = School.objects.select_related('communicator').get(id=school.id)
+
+    school_dict = model_to_dict(school_obj)
+
+    school_dict['communicator'] = {**model_to_dict(school_obj.communicator, fields=["username", "email"]), **UserData.objects.get(user=school.communicator, fields=["display_name"])}
 
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "modified": modules.django_model_operations.model_to_dict(school),
+        "modified": model_to_dict(school),
     }, status=200)
