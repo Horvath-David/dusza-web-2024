@@ -1,6 +1,5 @@
 import {
   Component,
-  createEffect,
   createSignal,
   For,
   onMount,
