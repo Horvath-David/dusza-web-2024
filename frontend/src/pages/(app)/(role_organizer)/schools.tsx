@@ -1,4 +1,11 @@
-import { Component, createSignal, For, onMount } from "solid-js";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Show,
+} from "solid-js";
 import {
   Table,
   TableBody,
@@ -20,10 +27,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { FaSolidPencil } from "solid-icons/fa";
+import {
+  FaSolidFloppyDisk,
+  FaSolidPencil,
+  FaSolidPlus,
+  FaSolidTrashCan,
+  FaSolidXmark,
+} from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Button } from "~/components/ui/button";
 import { DetailedShool } from "~/lib/models";
+import { Hr } from "~/components/Sidebar";
+import { Spinner } from "~/components/Spinner";
+import { toast } from "solid-sonner";
 
 async function getAllShoolInfo() {
   const res = await makeRequest<{
@@ -46,16 +62,25 @@ const Schools: Component<{}> = () => {
   const [communicatorEmail, setCommunicatorEmail] = createSignal("");
   const [schoolPassword, setSchoolPassword] = createSignal("");
 
+  const [loading, setLoading] = createSignal(false);
+  const [saving, setSaving] = createSignal(false);
+  const [deleting, setDeleting] = createSignal(false);
+  const [adding, setAdding] = createSignal(false);
+  const [addModalOpen, setAddModalOpen] = createSignal(false);
+
   onMount(async () => {
+    setLoading(true);
     setAllSchool(await getAllShoolInfo());
+    setLoading(false);
   });
 
   const handleSubmitNewShool = async (event: SubmitEvent) => {
     event.preventDefault();
 
+    setAdding(true);
     const res = await makeRequest({
-      method: "POST",
       endpoint: "/school/create",
+      method: "POST",
       body: {
         username: schoolUserName(),
         password: schoolPassword(),
@@ -65,85 +90,79 @@ const Schools: Component<{}> = () => {
         email: communicatorEmail(),
       },
     });
-    setAllSchool([
-      ...allSchool(),
-      {
-        id: res.data?.created.id,
-        name: schoolName(),
-        address: schoolAddress(),
-        communicator: {
-          username: schoolUserName(),
-          name: communicatorName(),
-          email: communicatorEmail(),
+    if (res.ok) {
+      setAllSchool([
+        ...allSchool(),
+        {
+          id: res.data?.created.id,
+          name: schoolName(),
+          address: schoolAddress(),
+          communicator: {
+            username: schoolUserName(),
+            display_name: communicatorName(),
+            email: communicatorEmail(),
+          },
         },
+      ]);
+      setSchoolName("");
+      setSchoolAddress("");
+      setCommunicatorName("");
+      setCommunicatorEmail("");
+      setSchoolPassword("");
+      setSchoolUserName("");
+      setAddModalOpen(false);
+      toast.success("Iskola sikeresen hozzáadva!");
+    }
+    setAdding(false);
+  };
+
+  const handleSave = async (school: DetailedShool) => {
+    setSaving(true);
+    const res = await makeRequest<{
+      status: string;
+      error?: string;
+      modified: DetailedShool;
+    }>({
+      endpoint: `/school/${school.id}/manage`,
+      method: "PATCH",
+      body: {
+        username: schoolUserName(),
+        school_name: schoolName(),
+        address: schoolAddress(),
+        display_name: communicatorName(),
+        email: communicatorEmail(),
       },
-    ]);
-    setSchoolName("");
-    setSchoolAddress("");
-    setCommunicatorName("");
-    setCommunicatorEmail("");
-    setSchoolPassword("");
-    setSchoolUserName("");
+    });
+    if (res.ok) {
+      setAllSchool(
+        allSchool().map((x) => (x.id === school.id ? res.data!.modified : x)),
+      );
+      toast.success("Sikeres mentés!");
+    }
+    setSaving(false);
+  };
+
+  const handleDelete = async (school: DetailedShool) => {
+    setDeleting(true);
+    const res = await makeRequest<{
+      status: string;
+      error?: string;
+      modified: DetailedShool;
+    }>({
+      endpoint: `/school/${school.id}/manage`,
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setAllSchool(allSchool().filter((x) => x.id !== school.id));
+      toast.success("Sikeres törlés!");
+    }
+    setDeleting(false);
   };
 
   return (
     <>
-      <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
-        <h1 class="my-8 text-2xl font-semibold">Intézmények</h1>
-        <form
-          class="mx-auto flex max-w-sm flex-col items-center gap-4"
-          onSubmit={handleSubmitNewShool}
-        >
-          <TextField
-            value={schoolUserName()}
-            onChange={setSchoolUserName}
-            required
-          >
-            <TextFieldLabel>Intézmény felhasználóneve:</TextFieldLabel>
-            <TextFieldInput type="text"></TextFieldInput>
-          </TextField>
-          <TextField
-            value={schoolPassword()}
-            onChange={setSchoolPassword}
-            required
-          >
-            <TextFieldLabel>Intézmény jelszava:</TextFieldLabel>
-            <TextFieldInput type="password"></TextFieldInput>
-          </TextField>
-          <TextField value={schoolName()} onChange={setSchoolName} required>
-            <TextFieldLabel>Intézmény neve:</TextFieldLabel>
-            <TextFieldInput type="text"></TextFieldInput>
-          </TextField>
-          <TextField
-            value={schoolAddress()}
-            onChange={setSchoolAddress}
-            required
-          >
-            <TextFieldLabel>Intézmény címe:</TextFieldLabel>
-            <TextFieldInput type="text"></TextFieldInput>
-          </TextField>
-          <TextField
-            value={communicatorName()}
-            onChange={setCommunicatorName}
-            required
-          >
-            <TextFieldLabel>Kapcsolattartó neve:</TextFieldLabel>
-            <TextFieldInput type="text"></TextFieldInput>
-          </TextField>
-          <TextField
-            value={communicatorEmail()}
-            onChange={setCommunicatorEmail}
-            required
-          >
-            <TextFieldLabel>Kapcsolattartó email címe:</TextFieldLabel>
-            <TextFieldInput type="email"></TextFieldInput>
-          </TextField>
-          <Button class="mb-4 mt-6 w-full" type="submit">
-            Hozzáadás
-          </Button>
-        </form>
-      </div>
       <div>
+        <h1 class="my-8 text-center text-2xl font-semibold">Intézmények</h1>
         <Table class="mx-auto max-w-2xl">
           <TableHeader>
             <TableRow>
@@ -156,6 +175,17 @@ const Schools: Component<{}> = () => {
             <For each={allSchool()}>
               {(school) => {
                 const [open, setOpen] = createSignal(false);
+
+                createEffect(() => {
+                  if (open()) {
+                    setSchoolName(school.name);
+                    setSchoolAddress(school.address);
+                    setCommunicatorName(school.communicator.display_name);
+                    setCommunicatorEmail(school.communicator.email);
+                    setSchoolUserName(school.communicator.username);
+                  }
+                });
+
                 return (
                   <Dialog open={open()} onOpenChange={setOpen}>
                     <DialogTrigger
@@ -165,7 +195,9 @@ const Schools: Component<{}> = () => {
                           onClick={() => setOpen(true)}
                         >
                           <TableCell>{school.name}</TableCell>
-                          <TableCell>{school.communicator.name}</TableCell>
+                          <TableCell>
+                            {school.communicator.display_name}
+                          </TableCell>
                           <TableCell class="text-right">
                             <Button size="icon" variant="secondary">
                               <FaSolidPencil />
@@ -174,80 +206,88 @@ const Schools: Component<{}> = () => {
                         </TableRow>
                       )}
                     ></DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>{school.name} szerkeztése</DialogTitle>
-                      </DialogHeader>
-                      <div>
-                        <TextField
-                          class="grid grid-cols-4 items-center gap-4"
-                          onChange={setSchoolName}
+                    <DialogContent noDefaultCloseButton={true} class="py-4">
+                      <DialogHeader class="flex-row items-center">
+                        <DialogTitle class="text-xl">
+                          {school.name} szerkeztése
+                        </DialogTitle>
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          class="-mr-2 ml-auto shrink-0"
+                          onClick={() => setOpen(false)}
                         >
-                          <TextFieldLabel class="text-right text-sm">
-                            Neve
-                          </TextFieldLabel>
-                          <TextFieldInput
-                            value={school.name}
-                            class="col-span-3"
-                            type="text"
+                          <FaSolidXmark
+                            size={20}
+                            class="text-muted-foreground"
                           />
+                        </Button>
+                      </DialogHeader>
+                      <Hr padding="1.5rem" />
+                      <div class="flex flex-col gap-4">
+                        <TextField class="max-w-full" onChange={setSchoolName}>
+                          <TextFieldLabel>Neve</TextFieldLabel>
+                          <TextFieldInput value={school.name} type="text" />
                         </TextField>
                         <TextField
-                          class="grid grid-cols-4 items-center gap-4"
+                          class="max-w-full"
                           onChange={setSchoolAddress}
                         >
-                          <TextFieldLabel class="text-right text-sm">
-                            Címe
-                          </TextFieldLabel>
-                          <TextFieldInput
-                            value={school.address}
-                            class="col-span-3"
-                            type="text"
-                          />
+                          <TextFieldLabel>Címe</TextFieldLabel>
+                          <TextFieldInput value={school.address} type="text" />
                         </TextField>
                         <TextField
-                          class="grid grid-cols-4 items-center gap-4"
+                          class="max-w-full"
                           onChange={setSchoolUserName}
                         >
-                          <TextFieldLabel class="text-right text-sm">
-                            Felhasználó neve
-                          </TextFieldLabel>
+                          <TextFieldLabel>Felhasználó neve</TextFieldLabel>
                           <TextFieldInput
                             value={school.communicator.username}
-                            class="col-span-3"
                             type="text"
                           />
                         </TextField>
-                        <TextField
-                          class="grid grid-cols-4 items-center gap-4"
-                          onChange={setCommunicatorName}
-                        >
-                          <TextFieldLabel class="text-right text-sm">
-                            Kapcsolattartó neve
-                          </TextFieldLabel>
-                          <TextFieldInput
-                            value={school.communicator.name}
-                            class="col-span-3"
-                            type="text"
-                          />
-                        </TextField>
-                        <TextField
-                          class="grid grid-cols-4 items-center gap-4"
-                          onChange={setCommunicatorEmail}
-                        >
-                          <TextFieldLabel class="text-right text-sm">
-                            Kapcsolattartó email címe
-                          </TextFieldLabel>
-                          <TextFieldInput
-                            value={school.communicator.email}
-                            class="col-span-3"
-                            type="text"
-                          />
-                        </TextField>
+                        <div class="flex gap-4">
+                          <TextField onChange={setCommunicatorName}>
+                            <TextFieldLabel>Kapcsolattartó neve</TextFieldLabel>
+                            <TextFieldInput
+                              value={school.communicator.display_name}
+                              type="text"
+                            />
+                          </TextField>
+                          <TextField onChange={setCommunicatorEmail}>
+                            <TextFieldLabel>
+                              Kapcsolattartó email címe
+                            </TextFieldLabel>
+                            <TextFieldInput
+                              value={school.communicator.email}
+                              type="email"
+                            />
+                          </TextField>
+                        </div>
                       </div>
-                      <DialogFooter>
-                        <Button variant="destructive">Törlés</Button>
-                        <Button>Szerkeztés</Button>
+                      <Hr padding="1.5rem" />
+                      <DialogFooter class="-mx-2 flex-row gap-4">
+                        <Button
+                          class="flex-1"
+                          variant="destructive"
+                          onClick={() => handleDelete(school)}
+                          disabled={deleting()}
+                        >
+                          <Show when={!deleting()} fallback={<Spinner />}>
+                            <FaSolidTrashCan />
+                          </Show>
+                          Törlés
+                        </Button>
+                        <Button
+                          class="flex-[2]"
+                          onClick={() => handleSave(school)}
+                          disabled={saving()}
+                        >
+                          <Show when={!saving()} fallback={<Spinner />}>
+                            <FaSolidFloppyDisk />
+                          </Show>
+                          Mentés
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -256,6 +296,133 @@ const Schools: Component<{}> = () => {
             </For>
           </TableBody>
         </Table>
+
+        <Show when={!loading()}>
+          {(() => {
+            createEffect(() => {
+              if (addModalOpen()) {
+                setSchoolName("");
+                setSchoolAddress("");
+                setCommunicatorName("");
+                setCommunicatorEmail("");
+                setSchoolPassword("");
+                setSchoolUserName("");
+              }
+            });
+
+            return (
+              <Dialog open={addModalOpen()} onOpenChange={setAddModalOpen}>
+                <DialogTrigger
+                  as={() => (
+                    <Button
+                      variant="default"
+                      class="absolute bottom-10 right-10"
+                      onClick={() => setAddModalOpen(true)}
+                    >
+                      <FaSolidPlus />
+                      Új hozzáadása
+                    </Button>
+                  )}
+                ></DialogTrigger>
+                <DialogContent noDefaultCloseButton={true} class="py-4">
+                  <form
+                    class="flex flex-col gap-4"
+                    onSubmit={handleSubmitNewShool}
+                  >
+                    <DialogHeader class="flex-row items-center">
+                      <DialogTitle class="text-xl">
+                        Új iskola hozzáadása
+                      </DialogTitle>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        class="-mr-2 ml-auto shrink-0"
+                        onClick={() => setAddModalOpen(false)}
+                      >
+                        <FaSolidXmark size={20} class="text-muted-foreground" />
+                      </Button>
+                    </DialogHeader>
+                    <Hr padding="1.5rem" />
+                    <div class="flex flex-col gap-4">
+                      <div class="flex gap-4">
+                        <TextField
+                          required
+                          class="max-w-full"
+                          onChange={setSchoolUserName}
+                        >
+                          <TextFieldLabel>Felhasználónév</TextFieldLabel>
+                          <TextFieldInput
+                            value={schoolUserName()}
+                            type="text"
+                          />
+                        </TextField>
+                        <TextField
+                          required
+                          class="max-w-full"
+                          onChange={setSchoolPassword}
+                        >
+                          <TextFieldLabel>Jelszó</TextFieldLabel>
+                          <TextFieldInput
+                            value={schoolPassword()}
+                            type="password"
+                          />
+                        </TextField>
+                      </div>
+                      <TextField
+                        required
+                        class="max-w-full"
+                        onChange={setSchoolName}
+                      >
+                        <TextFieldLabel>Iskola neve</TextFieldLabel>
+                        <TextFieldInput value={schoolName()} type="text" />
+                      </TextField>
+                      <TextField
+                        required
+                        class="max-w-full"
+                        onChange={setSchoolAddress}
+                      >
+                        <TextFieldLabel>Iskola címe</TextFieldLabel>
+                        <TextFieldInput value={schoolAddress()} type="text" />
+                      </TextField>
+                      <div class="flex gap-4">
+                        <TextField required onChange={setCommunicatorName}>
+                          <TextFieldLabel>Kapcsolattartó neve</TextFieldLabel>
+                          <TextFieldInput
+                            value={communicatorName()}
+                            type="text"
+                          />
+                        </TextField>
+                        <TextField required onChange={setCommunicatorEmail}>
+                          <TextFieldLabel>
+                            Kapcsolattartó email címe
+                          </TextFieldLabel>
+                          <TextFieldInput
+                            value={communicatorEmail()}
+                            type="email"
+                          />
+                        </TextField>
+                      </div>
+                    </div>
+                    <Hr padding="1.5rem" />
+                    <DialogFooter class="-mx-2 flex-row gap-4">
+                      <Button
+                        class="flex-[2]"
+                        variant="success"
+                        type="submit"
+                        disabled={adding()}
+                      >
+                        <Show when={!adding()} fallback={<Spinner />}>
+                          <FaSolidPlus />
+                        </Show>
+                        Hozzáadás
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            );
+          })()}
+        </Show>
       </div>
     </>
   );
