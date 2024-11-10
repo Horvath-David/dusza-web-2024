@@ -55,7 +55,9 @@ const Categories: Component<{}> = () => {
   onMount(async () => {
     setLoading(true);
     setAllCategory(await getAllCategory());
+    setAllCategory(allCategory().sort((a, b) => a.name.localeCompare(b.name)))
     setLoading(false);
+   
   });
 
   const handleSubmitNewCategory = async (event: SubmitEvent) => {

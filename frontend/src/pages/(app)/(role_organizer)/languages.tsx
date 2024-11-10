@@ -44,6 +44,7 @@ async function getAllProgLang() {
   return res.data?.list ?? [];
 }
 
+
 const ProgrammingLangs: Component<{}> = () => {
   const [newProgLang, setNewProgLang] = createSignal("");
   const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
@@ -55,7 +56,8 @@ const ProgrammingLangs: Component<{}> = () => {
   onMount(async () => {
     setLoading(true);
     setAllProgLang(await getAllProgLang());
-    setLoading(false);
+    setAllProgLang(allProgLang().sort((a, b) => a.name.localeCompare(b.name)))
+    setLoading(false)
   });
 
   const handleSubmitNewProgLang = async (event: SubmitEvent) => {
