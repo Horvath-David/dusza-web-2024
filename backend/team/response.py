@@ -171,6 +171,10 @@ def edit_team(request: WSGIRequest, team_id):
                      f"\nDusza panel",
             )
             team.delete()
+            return JsonResponse({
+                "status": "Ok",
+                "error": None,
+            }, status=200)
 
     if user_object.role == "organizer" or user_object.role == "school":
         return JsonResponse({
