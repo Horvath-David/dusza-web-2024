@@ -218,7 +218,7 @@ const Teams: Component<{}> = () => {
                               <div class="flex items-center gap-2 font-semibold">
                                 <FaSolidPersonChalkboard />
                                 <span class="line-clamp-2 break-words">
-                                  Felkészítő tanár
+                                  Felkészítő tanár(ok)
                                 </span>
                               </div>
                               {team.teacher_name}

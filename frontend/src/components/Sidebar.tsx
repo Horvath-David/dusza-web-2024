@@ -102,7 +102,7 @@ function getRouteData(path: string): RouteData {
     case "/edit-school-info":
       return {
         title: "Adatok módosítása",
-        icon:  FaSolidPen,
+        icon: FaSolidPen,
         order: 1,
       };
 
@@ -258,7 +258,7 @@ export const Sidebar: Component<{}> = () => {
           <div class="text-sm font-semibold leading-none text-neutral-400">
             {
               {
-                contestant: "versenyző",
+                contestant: "versenyző/felk. tanár",
                 organizer: "szervező",
                 school: "iskolai kapcsolattartó",
               }[me()?.user_data?.role ?? ""]

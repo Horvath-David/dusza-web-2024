@@ -278,7 +278,7 @@ const NewTeam: Component<{}> = () => {
         value={teacher()}
         onChange={setTeacher}
       >
-        <TextFieldLabel>Felkészítő tanár neve: </TextFieldLabel>
+        <TextFieldLabel>Felkészítő tanár(ok) neve: </TextFieldLabel>
         <TextFieldInput type="text" />
       </TextField>
 
