@@ -337,6 +337,18 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
 @require_POST
 @wrappers.require_role(["organizer"])
 def request_info_fix(request: WSGIRequest, team_id):
+    try:
+        body = json.loads(request.body)
+    except JSONDecodeError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Hibás kérés",
+        }, status=400)
+    if "text" not in body.keys() or not body["text"]:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Hibás kérés",
+        }, status=400)
     if Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).exists():
         return JsonResponse({
             "status": "Ez a csapat már kapott figyelmeztetést. Majd értesíteni fogom az eredeti jelentőt ha reagált a csapat a kérésére",
@@ -353,13 +365,8 @@ def request_info_fix(request: WSGIRequest, team_id):
     user_data = UserData.objects.get(user=team_obj.owner)
     Notification.objects.create(
         recipient=team_obj.owner,
-        title="Hiánypótlási kérés",
-        text=f"Kedves {user_data.display_name}! "
-             f"\nAz egyik szervező hiánypótlási kérést küldött neked, mert úgy véli, hogy hiányos, pontatlan vagy "
-             f"nem megfelelő adatokat adtál meg a(z) {team_obj.name} csapatod regisztrálásakor. Kérlek, miharabb "
-             f"javítsd a hibát, mert ez akár a csapatod versenyből való kizárását is jelentheti! "
-             f"\nÜdvözlettel,"
-             f"\nDusza panel",
+        title=f"{UserData.objects.get(user=request.user).display_name} üzenetet küldött neked",
+        text=body["text"],
         delete_on_modify={
             "name": "team",
             "id": team_id
