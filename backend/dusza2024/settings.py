@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'category.apps.CategoryConfig',
     'prog_lang.apps.ProgLangConfig',
     'me.apps.MeConfig',
-    'configure.apps.ConfigureConfig'
+    'configure.apps.ConfigureConfig',
+    'file.apps.FileConfig'
 ]
 
 MIDDLEWARE = [

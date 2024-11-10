@@ -1,5 +1,5 @@
 from django.urls import path, include
-import authenticate.urls, team.urls, school.urls, prog_lang.urls, category.urls, me.urls, configure.urls
+import authenticate.urls, team.urls, school.urls, prog_lang.urls, category.urls, me.urls, configure.urls, file.urls
 from . import response
 
 urlpatterns = [
@@ -11,5 +11,6 @@ urlpatterns = [
     path('config/', include(configure.urls)),
     path('me/', include(me.urls)),
     path('statistics/', response.statistics),
+    path('file/', file.statistics),
 ]
 

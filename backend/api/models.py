@@ -16,6 +16,10 @@ TEAM_STATUSES = (
     ('approved_by_school', 'Iskola által jóváhagyva'),
 )
 
+FILE_TYPES = (
+    ("image", "Kép"),
+)
+
 
 class Config(models.Model):
     name = models.CharField(max_length=255)
@@ -94,3 +98,14 @@ class Team(models.Model):
 
     def __str__(self):
         return f"({self.id}) {self.name}"
+
+
+class File(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, blank=True, null=True)
+    path = models.CharField(max_length=255, unique=True)
+    file_type = models.CharField(choices=FILE_TYPES, max_length=255)
+
+    def __str__(self):
+        return self.name

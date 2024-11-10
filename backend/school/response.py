@@ -1,5 +1,7 @@
 import json
 import os
+from dataclasses import fields
+from fileinput import fileno
 from json import JSONDecodeError
 import modules.django_model_operations, modules.name_operations
 
@@ -12,7 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
 from authenticate import wrappers
-from api.models import School, UserData
+from api.models import School, UserData, File
 
 
 # Create your views here.
@@ -41,7 +43,7 @@ def list_all(request: WSGIRequest):
             "name": i.name,
             "address": i.address,
             "communicator": {
-                "name": UserData.objects.get(user=i.communicator).display_name,
+                "display_name": UserData.objects.get(user=i.communicator).display_name,
                 "username": i.communicator.username,
                 "email": i.communicator.email,
             }
@@ -112,6 +114,13 @@ def create_school(request: WSGIRequest):
 @require_http_methods(["DELETE", "PATCH"])
 def manage_school(request: WSGIRequest, school_id):
     user_data = UserData.objects.get(user=request.user)
+
+    if not School.objects.filter(id=school_id).exists():
+            return JsonResponse({
+                "status": "Error",
+                "error": "Nem találtam ezt az iskolát",
+            }, status=404)
+
     school = School.objects.get(id=school_id)
     if request.method == "DELETE":
         if user_data.role == "school" and school.communicator != request.user:
@@ -120,7 +129,12 @@ def manage_school(request: WSGIRequest, school_id):
                 "error": "Nincs jogosultságod, hogy eltávolítsd ezt az iskolát",
             }, status=403)
 
+        for i in File.objects.filter(owner=school.communicator):
+            os.remove(i.path)
+            i.delete()
+
         school.communicator.delete()
+
 
         return JsonResponse({
             "status": "Ok",
@@ -135,23 +149,31 @@ def manage_school(request: WSGIRequest, school_id):
             "error": "Hibás kérés",
         }, status=400)
 
-    if "school_name" in body.keys():
-        school.name = body["school_name"]
-    if "address" in body.keys():
-        school.address = body["address"]
-    school.save()
 
-    if "username" in body.keys():
-        school.communicator.username = body["username"]
-    if "password" in body.keys():
-        school.communicator.set_password(body["password"])
-    if "email" in body.keys():
-        school.communicator.email = body["email"]
+    try:
+        if "school_name" in body.keys():
+            school.name = body["school_name"]
+        if "address" in body.keys():
+            school.address = body["address"]
+
+        if "username" in body.keys():
+            school.communicator.username = body["username"]
+        if "password" in body.keys():
+            school.communicator.set_password(body["password"])
+        if "email" in body.keys():
+            school.communicator.email = body["email"]
+
+        user_data = UserData.objects.get(user=school.communicator)
+        if "display_name" in body.keys():
+            user_data.display_name = body["display_name"]
+    except IntegrityError:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Egy vagy több feltétel nem teljesült. Az adatokat nem mentettem el",
+        }, status=400)
+
     school.communicator.save()
-
-    user_data = UserData.objects.get(user=school.communicator)
-    if "display_name" in body.keys():
-        user_data.display_name = body["display_name"]
+    school.save()
     user_data.save()
 
     school_obj = School.objects.select_related('communicator').get(id=school.id)
