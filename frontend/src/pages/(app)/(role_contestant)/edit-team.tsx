@@ -35,7 +35,7 @@ import {
 import { Label } from "~/components/ui/label";
 import { Spinner } from "~/components/Spinner";
 import { toast } from "solid-sonner";
-import { useNotifications, useRefetch, useUser } from "~/contexts/userContext";
+import { useMe } from "~/contexts/userContext";
 import { FaSolidFloppyDisk } from "solid-icons/fa";
 import { Callout, CalloutContent, CalloutTitle } from "~/components/ui/callout";
 
@@ -62,8 +62,7 @@ async function getCategory() {
 }
 
 const NewTeam: Component<{}> = () => {
-  const user = useUser();
-  const refetch = useRefetch();
+  const [me, { refetch }] = useMe();
 
   const [teamName, setTeamName] = createSignal("");
 
@@ -88,7 +87,6 @@ const NewTeam: Component<{}> = () => {
   const [loading, setLoading] = createSignal(true);
   const [saving, setSaving] = createSignal(false);
 
-  const notifications = useNotifications()!;
   const [notify, setNotify] = createSignal(false);
 
   onMount(async () => {
@@ -124,9 +122,9 @@ const NewTeam: Component<{}> = () => {
   });
 
   createEffect(() => {
-    if (notifications()[0] !== undefined) {
+    if (me()?.notifications[0] !== undefined) {
       setNotify(true);
-      console.log(notifications()[0]);
+      console.log(me()?.notifications[0]);
     }
   });
 
@@ -145,7 +143,7 @@ const NewTeam: Component<{}> = () => {
     setSaving(true);
 
     const res = await makeRequest({
-      endpoint: `/team/${user()?.team_id}/manage`,
+      endpoint: `/team/${me()?.user_data?.team_id}/manage`,
       method: "PATCH",
       body: {
         name: teamName(),
@@ -178,7 +176,7 @@ const NewTeam: Component<{}> = () => {
 
     if (res.ok) {
       toast.success("Sikeres mentés!");
-      refetch();
+      await refetch();
     }
 
     setSaving(false);
@@ -194,9 +192,9 @@ const NewTeam: Component<{}> = () => {
       <Show when={!loading()} fallback={<Spinner />}>
         <Show when={notify()}>
           <Callout variant="warning">
-            <CalloutTitle>{notifications()[0].title}</CalloutTitle>
+            <CalloutTitle>{me()?.notifications?.at(0)?.title}</CalloutTitle>
             <CalloutContent>
-              <For each={notifications()[0].text.split("\n")}>
+              <For each={me()?.notifications?.at(0)?.text.split("\n")}>
                 {(noty) => <p>{noty}</p>}
               </For>
             </CalloutContent>

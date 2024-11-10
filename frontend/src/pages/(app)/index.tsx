@@ -1,12 +1,12 @@
 import { Component } from "solid-js";
-import { useUser } from "~/contexts/userContext";
+import { useMe } from "~/contexts/userContext";
 
 const Home: Component<{}> = () => {
-  const user = useUser();
+  const [me] = useMe();
 
   return (
     <div class="flex h-full w-full flex-col items-center justify-center gap-6 text-3xl">
-      Üdv, {user()?.display_name}
+      Üdv, {me()?.user_data?.display_name}
     </div>
   );
 };

@@ -1,15 +1,15 @@
 import { Component, createSignal, onMount, ParentProps, Show } from "solid-js";
 import { toast } from "solid-sonner";
-import { useUser } from "~/contexts/userContext";
+import { useMe } from "~/contexts/userContext";
 import { useNavigate } from "~/router";
 
 const _layout: Component<{}> = (props: ParentProps) => {
   const navigate = useNavigate();
-  const user = useUser()!;
+  const [me] = useMe();
   const [allowed, setAllowed] = createSignal(false);
 
   onMount(() => {
-    if (user()?.role !== "organizer") {
+    if (me()?.user_data?.role !== "organizer") {
       toast.error("Nincs jogod ehhez!");
       navigate("/");
     } else {

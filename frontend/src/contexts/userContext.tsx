@@ -12,30 +12,65 @@ import { useNavigate } from "~/router";
 import { useLocation } from "@solidjs/router";
 import { toast } from "solid-sonner";
 
-const UserContext = createContext<Accessor<UserData | undefined>>();
-const NotificationContext = createContext<Accessor<Notification[]>>();
-const SchoolContext = createContext<Accessor<School | undefined>>();
-const RefetchContext = createContext<() => Promise<void>>();
+export interface Me {
+  user_data: UserData;
+  notifications: Notification[];
+  school?: School;
+}
+
+export type MeContextType = [
+  Accessor<Me | undefined>,
+  {
+    refetch: () => Promise<void>;
+  },
+];
+
+const MeContext = createContext<MeContextType>();
 
 export const UserProvider = (props: ParentProps) => {
-  const [user, setUser] = createSignal<UserData>();
-  const [notifications, setNotifications] = createSignal<Notification[]>([]);
-  const [school, setSchool] = createSignal<School>();
   const navigate = useNavigate();
   const loc = useLocation();
 
-  const fetchData = async () => {
-    const res = await makeRequest<{
-      status: string;
-      error: string;
-      user_data: UserData;
-      notifications: Notification[];
-      school?: School;
-    }>({
+  const [me, setMe] = createSignal<Me>(),
+    meCtx: MeContextType = [
+      me,
+      {
+        async refetch() {
+          console.log("Refetch started");
+          const res = await makeRequest({
+            endpoint: "/me/",
+            noErrorToast: true,
+          });
+          console.log("Response received:", res);
+
+          const shouldBeLoggedIn =
+            localStorage.getItem("shouldBeLoggedIn") === "true";
+          if (!res.ok) {
+            if (loc.pathname.startsWith("/auth")) return;
+            if (shouldBeLoggedIn) toast.error("Nincs bejelentkezve!");
+
+            console.log("Navigating to /auth/login");
+            navigate("/auth/login", {
+              state: {
+                redirect_path: loc.pathname,
+              },
+            });
+            return;
+          }
+
+          console.log("Setting user data with res.data:", res.data);
+          setMe(res.data);
+          localStorage.setItem("shouldBeLoggedIn", "true");
+          console.log("Refetch completed");
+        },
+      },
+    ];
+
+  onMount(async () => {
+    const res = await makeRequest({
       endpoint: "/me/",
       noErrorToast: true,
     });
-
     const shouldBeLoggedIn = localStorage.getItem("shouldBeLoggedIn") == "true";
     if (!res.ok) {
       if (loc.pathname.startsWith("/auth")) return;
@@ -47,30 +82,17 @@ export const UserProvider = (props: ParentProps) => {
       });
       return;
     }
-    setUser(res.data?.user_data);
-    setNotifications(res.data?.notifications ?? []);
-    setSchool(res.data?.school);
+    setMe(res.data);
     localStorage.setItem("shouldBeLoggedIn", "true");
-  };
-
-  onMount(() => {
-    fetchData();
   });
 
   return (
-    <UserContext.Provider value={user}>
-      <NotificationContext.Provider value={notifications}>
-        <SchoolContext.Provider value={school}>
-          <RefetchContext.Provider value={fetchData}>
-            {props.children}
-          </RefetchContext.Provider>
-        </SchoolContext.Provider>
-      </NotificationContext.Provider>
-    </UserContext.Provider>
+    <MeContext.Provider value={meCtx}>{props.children}</MeContext.Provider>
   );
 };
 
-export const useUser = () => useContext(UserContext)!;
-export const useNotifications = () => useContext(NotificationContext)!;
-export const useSchool = () => useContext(SchoolContext)!;
-export const useRefetch = () => useContext(RefetchContext)!;
+export function useMe(): MeContextType {
+  const context = useContext(MeContext);
+  if (!context) throw new Error("no me provider");
+  return context;
+}

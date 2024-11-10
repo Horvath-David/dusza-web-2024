@@ -5,7 +5,7 @@ import { cn } from "~/lib/utils";
 import { Spinner } from "./Spinner";
 import { makeRequest } from "~/lib/api";
 import { toast } from "solid-sonner";
-import { useUser } from "~/contexts/userContext";
+import { useMe } from "~/contexts/userContext";
 import { Path, useNavigate } from "~/router";
 import { routes } from "@generouted/solid-router";
 import {
@@ -19,7 +19,7 @@ import { FaRegularFileCode } from "solid-icons/fa";
 import { FaSolidSchoolFlag } from "solid-icons/fa";
 import { BiRegularCategoryAlt } from "solid-icons/bi";
 import { AiOutlineTeam } from "solid-icons/ai";
-import { AiOutlineLineChart } from 'solid-icons/ai'
+import { AiOutlineLineChart } from "solid-icons/ai";
 import { useLocation } from "@solidjs/router";
 import { Branding } from "./Branding";
 import { TbSettings } from "solid-icons/tb";
@@ -39,8 +39,8 @@ function getRouteData(path: string): RouteData {
         title: "Csapat hozzáadása",
         icon: FaSolidPlus,
         showWhen: () => {
-          const user = useUser()!;
-          return !user()?.team_id;
+          const [me] = useMe();
+          return !me()?.user_data?.team_id;
         },
         order: 1,
       };
@@ -49,8 +49,8 @@ function getRouteData(path: string): RouteData {
         title: "Csapat szerkesztése",
         icon: FaSolidPen,
         showWhen: () => {
-          const user = useUser()!;
-          return !!user()?.team_id;
+          const [me] = useMe();
+          return !!me()?.user_data?.team_id;
         },
         order: 1,
       };
@@ -85,12 +85,12 @@ function getRouteData(path: string): RouteData {
         icon: TbSettings,
         order: 5,
       };
-    
+
     case "/statistics":
       return {
-        title:"Statisztikák",
+        title: "Statisztikák",
         icon: AiOutlineLineChart,
-        order:6,
+        order: 6,
       };
 
     case "/school-teams":
@@ -148,7 +148,7 @@ function flattenPaths(objects: PathRoute[]): string[] {
 }
 
 export const Sidebar: Component<{}> = () => {
-  const user = useUser()!;
+  const [me] = useMe();
   const navigate = useNavigate();
   const loc = useLocation();
   const [loading, setLoading] = createSignal(false);
@@ -213,7 +213,7 @@ export const Sidebar: Component<{}> = () => {
           const links = flattenPaths(roleChildren as PathRoute[]);
 
           return (
-            <Show when={user()?.role === role}>
+            <Show when={me()?.user_data?.role === role}>
               <For
                 each={links
                   .map((x) => ({ ...getRouteData(x), path: x }))
@@ -249,17 +249,19 @@ export const Sidebar: Component<{}> = () => {
       {/* Bottom user part */}
       <div class="flex gap-4">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-700 to-cyan-400 text-xl font-black">
-          {user()?.display_name?.at(0)?.toUpperCase() ?? "U"}
+          {me()?.user_data?.display_name?.at(0)?.toUpperCase() ?? "U"}
         </div>
         <div class="flex flex-col justify-between">
-          <div class="font-semibold leading-none">{user()?.display_name}</div>
+          <div class="font-semibold leading-none">
+            {me()?.user_data?.display_name}
+          </div>
           <div class="text-sm font-semibold leading-none text-neutral-400">
             {
               {
                 contestant: "versenyző",
                 organizer: "szervező",
                 school: "iskolai kapcsolattartó",
-              }[user()?.role ?? ""]
+              }[me()?.user_data?.role ?? ""]
             }
           </div>
         </div>

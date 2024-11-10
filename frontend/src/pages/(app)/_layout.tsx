@@ -1,16 +1,16 @@
 import { Component, createEffect, ParentProps, Show } from "solid-js";
 import { Sidebar } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
-import { useUser } from "~/contexts/userContext";
+import { useMe } from "~/contexts/userContext";
 import { cn } from "~/lib/utils";
 
 const AppLayout: Component<{}> = (props: ParentProps) => {
-  const user = useUser()!;
-  createEffect(() => console.log("app layout user:", user()));
+  const [me] = useMe()!;
+  createEffect(() => console.log("app layout user:", me()));
 
   return (
     <div class="relative h-screen w-screen">
-      <Show when={user()}>
+      <Show when={me()?.user_data}>
         <div class="flex h-full w-full">
           <aside class="basis-64 border-r bg-black">
             <Sidebar />
@@ -24,7 +24,7 @@ const AppLayout: Component<{}> = (props: ParentProps) => {
       <Spinner
         class={cn(
           "absolute inset-0 h-full w-full bg-background opacity-100 transition-opacity duration-300",
-          user() && "pointer-events-none opacity-0",
+          me()?.user_data && "pointer-events-none opacity-0",
         )}
         size={32}
       />
