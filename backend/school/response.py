@@ -1,4 +1,5 @@
 import json
+import os
 from json import JSONDecodeError
 import modules.django_model_operations, modules.name_operations
 
@@ -74,7 +75,7 @@ def create_school(request: WSGIRequest):
         UserData.objects.create(
             user=communicator,
             display_name=body['display_name'],
-            role="communicator",
+            role="school",
         )
     except IntegrityError:
         communicator.delete()
