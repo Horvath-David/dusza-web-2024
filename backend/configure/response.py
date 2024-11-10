@@ -16,16 +16,11 @@ from authenticate import wrappers
 @wrappers.require_role(["organizer"])
 def get_registration_deadline(request: WSGIRequest):
     config_obj = Config.objects.first(name="reg_deadline")
-    if config_obj == None:
-        return JsonResponse({
-            "status": "Error",
-            "error": "Nem található a kért konfigurációs objektum",
-        }, status= 404)
 
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "deadline_date": config_obj.data["date"]
+        "deadline_date": None if config_obj == None else config_obj.data["date"]
     }, status= 200)
 
 
