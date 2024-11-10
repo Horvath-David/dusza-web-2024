@@ -5,15 +5,13 @@ import { Card } from "~/components/ui/card";
 import { makeRequest } from "~/lib/api";
 import { Statics } from "~/lib/models";
 import {
-  Progress,
-  ProgressLabel,
-  ProgressValueLabel,
+    Progress,
+    ProgressLabel,
+    ProgressValueLabel,
 } from "~/components/ui/progress";
-import { ChartData } from "chart.js";
 import {
-  FaSolidFileCode,
-  FaSolidHourglassEnd,
-  FaSolidSchool,
+    FaSolidHourglassEnd,
+    FaSolidSchool
 } from "solid-icons/fa";
 import { FiCode } from "solid-icons/fi";
 import { BiRegularCategoryAlt } from "solid-icons/bi";
