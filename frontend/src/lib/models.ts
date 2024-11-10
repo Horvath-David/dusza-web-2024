@@ -69,7 +69,7 @@ export interface FilterOptions {
 export interface Statics{
   number_of_shools: number;
   number_of_teams: number;
-  number_of_teams_per_schools: TeamsPerSchools[];
+  number_of_teams_per_school: TeamsPerSchools[];
   number_of_teams_per_status: TeamsPerStatus[];
   number_of_teams_per_category: TeamsPerCategory[];
   number_of_teams_per_prog_lang: TeamsPerProgLang[];

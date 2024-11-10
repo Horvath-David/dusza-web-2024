@@ -59,7 +59,7 @@ const BarList = <T,>(rawProps: BarListProps<T>) => {
       <For each={sortedData()}>
         {(bar, idx) => {
           return (
-            <div class="row flex w-full justify-between space-x-6">
+            <div class="row flex w-full justify-between space-x-6 ">
               <div class="grow">
                 <div
                   class={cn("flex h-8 items-center rounded-md bg-secondary px-2")}
@@ -70,7 +70,7 @@ const BarList = <T,>(rawProps: BarListProps<T>) => {
                   <Show when={bar.icon}>
                     {(icon) => <Dynamic component={icon()} class="mr-2 size-5 flex-none" />}
                   </Show>
-                  <Show when={bar.href} fallback={<p>{bar.name}</p>}>
+                  <Show when={bar.href} fallback={<p class="max-w-52 line-clamp-1">{bar.name}</p>}>
                     {(href) => (
                       <a
                         href={href()}
@@ -84,7 +84,7 @@ const BarList = <T,>(rawProps: BarListProps<T>) => {
                   </Show>
                 </div>
               </div>
-              <div class="flex items-center">{local.valueFormatter(bar.value)}</div>
+              <div class="flex items-center max-w-10">{local.valueFormatter(bar.value)}</div>
             </div>
           )
         }}
