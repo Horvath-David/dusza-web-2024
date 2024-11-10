@@ -144,108 +144,115 @@ const Schools: Component<{}> = () => {
         </form>
       </div>
       <div>
-        <h2 class="mb-4 mt-8 text-xl font-semibold">
-          Intézmények megtekintése:
-        </h2>
-        <Table class="max-w-50">
+        <Table class="mx-auto max-w-2xl">
           <TableHeader>
             <TableRow>
               <TableHead>Intézméynek</TableHead>
+              <TableHead>Kapcsolattartó</TableHead>
               <TableHead class="text-right">Szerkeztés</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <For each={allSchool()}>
-              {(school) => (
-                <TableRow>
-                  <TableCell>{school.name}</TableCell>
-                  <TableCell class="text-right">
-                    <Dialog>
-                      <DialogTrigger>
-                        <Button variant="secondary">
-                          <FaSolidPencil />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>{school.name} szerkeztése</DialogTitle>
-                        </DialogHeader>
-                        <div>
-                          <TextField
-                            class="grid grid-cols-4 items-center gap-4"
-                            onChange={setSchoolName}
-                          >
-                            <TextFieldLabel class="text-right text-sm">
-                              Neve
-                            </TextFieldLabel>
-                            <TextFieldInput
-                              value={school.name}
-                              class="col-span-3"
-                              type="text"
-                            />
-                          </TextField>
-                          <TextField
-                            class="grid grid-cols-4 items-center gap-4"
-                            onChange={setSchoolAddress}
-                          >
-                            <TextFieldLabel class="text-right text-sm">
-                              Címe
-                            </TextFieldLabel>
-                            <TextFieldInput
-                              value={school.address}
-                              class="col-span-3"
-                              type="text"
-                            />
-                          </TextField>
-                          <TextField
-                            class="grid grid-cols-4 items-center gap-4"
-                            onChange={setSchoolUserName}
-                          >
-                            <TextFieldLabel class="text-right text-sm">
-                              Felhasználó neve
-                            </TextFieldLabel>
-                            <TextFieldInput
-                              value={school.communicator.username}
-                              class="col-span-3"
-                              type="text"
-                            />
-                          </TextField>
-                          <TextField
-                            class="grid grid-cols-4 items-center gap-4"
-                            onChange={setCommunicatorName}
-                          >
-                            <TextFieldLabel class="text-right text-sm">
-                              Kapcsolattartó neve
-                            </TextFieldLabel>
-                            <TextFieldInput
-                              value={school.communicator.name}
-                              class="col-span-3"
-                              type="text"
-                            />
-                          </TextField>
-                          <TextField
-                            class="grid grid-cols-4 items-center gap-4"
-                            onChange={setCommunicatorEmail}
-                          >
-                            <TextFieldLabel class="text-right text-sm">
-                              Kapcsolattartó email címe
-                            </TextFieldLabel>
-                            <TextFieldInput
-                              value={school.communicator.email}
-                              class="col-span-3"
-                              type="text"
-                            />
-                          </TextField>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="destructive">Törlés</Button>
-                          <Button>Szerkeztés</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              )}
+              {(school) => {
+                const [open, setOpen] = createSignal(false);
+                return (
+                  <Dialog open={open()} onOpenChange={setOpen}>
+                    <DialogTrigger
+                      as={() => (
+                        <TableRow
+                          class="cursor-pointer"
+                          onClick={() => setOpen(true)}
+                        >
+                          <TableCell>{school.name}</TableCell>
+                          <TableCell>{school.communicator.name}</TableCell>
+                          <TableCell class="text-right">
+                            <Button size="icon" variant="secondary">
+                              <FaSolidPencil />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    ></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{school.name} szerkeztése</DialogTitle>
+                      </DialogHeader>
+                      <div>
+                        <TextField
+                          class="grid grid-cols-4 items-center gap-4"
+                          onChange={setSchoolName}
+                        >
+                          <TextFieldLabel class="text-right text-sm">
+                            Neve
+                          </TextFieldLabel>
+                          <TextFieldInput
+                            value={school.name}
+                            class="col-span-3"
+                            type="text"
+                          />
+                        </TextField>
+                        <TextField
+                          class="grid grid-cols-4 items-center gap-4"
+                          onChange={setSchoolAddress}
+                        >
+                          <TextFieldLabel class="text-right text-sm">
+                            Címe
+                          </TextFieldLabel>
+                          <TextFieldInput
+                            value={school.address}
+                            class="col-span-3"
+                            type="text"
+                          />
+                        </TextField>
+                        <TextField
+                          class="grid grid-cols-4 items-center gap-4"
+                          onChange={setSchoolUserName}
+                        >
+                          <TextFieldLabel class="text-right text-sm">
+                            Felhasználó neve
+                          </TextFieldLabel>
+                          <TextFieldInput
+                            value={school.communicator.username}
+                            class="col-span-3"
+                            type="text"
+                          />
+                        </TextField>
+                        <TextField
+                          class="grid grid-cols-4 items-center gap-4"
+                          onChange={setCommunicatorName}
+                        >
+                          <TextFieldLabel class="text-right text-sm">
+                            Kapcsolattartó neve
+                          </TextFieldLabel>
+                          <TextFieldInput
+                            value={school.communicator.name}
+                            class="col-span-3"
+                            type="text"
+                          />
+                        </TextField>
+                        <TextField
+                          class="grid grid-cols-4 items-center gap-4"
+                          onChange={setCommunicatorEmail}
+                        >
+                          <TextFieldLabel class="text-right text-sm">
+                            Kapcsolattartó email címe
+                          </TextFieldLabel>
+                          <TextFieldInput
+                            value={school.communicator.email}
+                            class="col-span-3"
+                            type="text"
+                          />
+                        </TextField>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="destructive">Törlés</Button>
+                        <Button>Szerkeztés</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                );
+              }}
             </For>
           </TableBody>
         </Table>
