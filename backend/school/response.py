@@ -158,10 +158,13 @@ def manage_school(request: WSGIRequest, school_id):
 
     school_dict = model_to_dict(school_obj)
 
-    school_dict['communicator'] = {**model_to_dict(school_obj.communicator, fields=["username", "email"]), **model_to_dict(UserData.objects.get(user=school.communicator), fields=["display_name"])}
+    school_dict['communicator'] = {
+        **model_to_dict(school_obj.communicator, fields=["username", "email"]),
+        **model_to_dict(UserData.objects.get(user=school.communicator), fields=["display_name"])
+    }
 
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "modified": model_to_dict(school),
+        "modified": school_dict,
     }, status=200)
