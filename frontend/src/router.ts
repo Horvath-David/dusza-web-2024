@@ -9,6 +9,7 @@ export type Path =
   | `/auth/login`
   | `/auth/register`
   | `/categories`
+  | `/configuration`
   | `/edit-team`
   | `/languages`
   | `/new-team`

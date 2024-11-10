@@ -21,6 +21,7 @@ import { BiRegularCategoryAlt } from "solid-icons/bi";
 import { AiOutlineTeam } from "solid-icons/ai";
 import { useLocation } from "@solidjs/router";
 import { Branding } from "./Branding";
+import { TbSettings } from "solid-icons/tb";
 
 interface RouteData {
   title?: string;
@@ -76,6 +77,12 @@ function getRouteData(path: string): RouteData {
         title: "Csapatok",
         icon: AiOutlineTeam,
         order: 4,
+      };
+    case "/configuration":
+      return {
+        title: "Konfiguráció",
+        icon: TbSettings,
+        order: 5,
       };
 
     case "/school-teams":
