@@ -1,4 +1,11 @@
-import { Component, createSignal, For, onMount, Show } from "solid-js";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Show,
+} from "solid-js";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +17,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { BsPeopleFill } from "solid-icons/bs";
 import {
+  FaSolidFile,
   FaSolidHourglassEnd,
   FaSolidPaperclip,
   FaSolidPen,
@@ -19,7 +27,7 @@ import {
   FaSolidXmark,
 } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
-import { makeRequest } from "~/lib/api";
+import { API_URL, makeRequest } from "~/lib/api";
 import { FilterOptions, Team } from "~/lib/models";
 import { toast } from "solid-sonner";
 import {
@@ -94,7 +102,7 @@ const Teams: Component<{}> = () => {
   const [approving, setApproving] = createSignal(false);
 
   const [secondDialog, setSecondDialog] = createSignal(false);
-  const [warningDialog, setWarningDialog] = createSignal("")
+  const [warningDialog, setWarningDialog] = createSignal("");
 
   const [filterByRegistry, setFilterByregistry] = createSignal<FilterOptions>({
     id: "",
@@ -113,7 +121,7 @@ const Teams: Component<{}> = () => {
       method: "POST",
       endpoint: `/team/${id}/request_info_fix`,
       body: {
-        text: warningDialog()
+        text: warningDialog(),
       },
       noErrorToast: true,
     });
@@ -131,7 +139,6 @@ const Teams: Component<{}> = () => {
       setWarningDialog("");
     }
     setAlerting(false);
- 
   }
 
   async function approveTeam(id: number) {
@@ -143,6 +150,9 @@ const Teams: Component<{}> = () => {
     });
     if (res.ok) {
       toast.success("Sikeres státusz változtatás");
+      setLoading(true);
+      setAllTeamInfo(await getTeams());
+      setLoading(false);
     }
     setApproving(false);
   }
@@ -189,7 +199,6 @@ const Teams: Component<{}> = () => {
     );
     saveCsv("csapatok.csv", csv);
   }
-
 
   return (
     <div class="mx-auto flex flex-col items-center gap-4">
@@ -258,160 +267,198 @@ const Teams: Component<{}> = () => {
                   </div>
                   {(() => {
                     const [open, setOpen] = createSignal(false);
+                    const [image, setImage] = createSignal("");
+                    const [imageOpen, setImageOpen] = createSignal(false);
+                    const [status, setStatus] = createSignal("");
+
+                    createEffect(async () => {
+                      if (open()) {
+                        setStatus(team.status);
+                        console.log(team.status);
+                        if (team.status !== "registered") {
+                          const res = await makeRequest({
+                            endpoint: `/file/get/team/${team.id}`,
+                          });
+                          if (res.ok) {
+                            console.log(res.data);
+                            setImage(
+                              `${API_URL}/file/get/${res?.data?.files?.at(0)}`,
+                            );
+                          }
+                        }
+                      }
+                    });
                     return (
-                      <Dialog open={open()} onOpenChange={setOpen}>
-                        <DialogTrigger class="ml-auto">
-                          <Button variant="secondary">Kezelés</Button>
-                        </DialogTrigger>
-                        <Show when={!secondDialog()} fallback={
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle class="text-xl">Éretsítés Küldése</DialogTitle>
-                            </DialogHeader>
-                            <div class="max-h-72">
-                              <TextField class="max-w-full max-h-72" value={warningDialog()} onChange={setWarningDialog} >
-                                <TextFieldTextArea placeholder="Ide írd a panaszod...">
-                                
-                                </TextFieldTextArea>
-                              </TextField>
-
-                            </div>
-                            <DialogFooter>
-                            <div class="flex w-full gap-4">
-                            <Button
-                                variant="warning"
-                                class="flex-1"
-                                onClick={() => {
-                                  alertTeam(team.id);
-                                
-                                }}
-                                disabled={alerting()}
-                              >
-                                <Show when={!alerting()} fallback={<Spinner />}>
-                                  <FaSolidPen />
-                                </Show>
-                                Módosítás kérése
-                              </Button>
-                              <Button onclick={()=>{setSecondDialog(false)}} variant="secondary">
-                                  Mégse
-                              </Button>
-                              </div>
-                            </DialogFooter>
-                          </DialogContent>
-                        }>
-                        <DialogContent noDefaultCloseButton={true} class="py-4">
-                         
-                          <DialogHeader class="flex-row items-center">
-                            <DialogTitle class="text-xl">
-                              {team.name} adatai
-                            </DialogTitle>
-                            <Button
-                              size="icon"
-                              variant="secondary"
-                              class="-mr-2 ml-auto"
-                              onClick={() => setOpen(false)}
+                      <>
+                        <Dialog open={open()} onOpenChange={setOpen}>
+                          <DialogTrigger class="ml-auto">
+                            <Button variant="secondary">Kezelés</Button>
+                          </DialogTrigger>
+                          <Show
+                            when={!secondDialog()}
+                            fallback={
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle class="text-xl">
+                                    Éretsítés Küldése
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div class="max-h-72">
+                                  <TextField
+                                    class="max-h-72 max-w-full"
+                                    value={warningDialog()}
+                                    onChange={setWarningDialog}
+                                  >
+                                    <TextFieldTextArea placeholder="Ide írd a panaszod..."></TextFieldTextArea>
+                                  </TextField>
+                                </div>
+                                <DialogFooter>
+                                  <div class="flex w-full gap-4">
+                                    <Button
+                                      variant="warning"
+                                      class="flex-1"
+                                      onClick={() => {
+                                        alertTeam(team.id);
+                                      }}
+                                      disabled={alerting()}
+                                    >
+                                      <Show
+                                        when={!alerting()}
+                                        fallback={<Spinner />}
+                                      >
+                                        <FaSolidPen />
+                                      </Show>
+                                      Módosítás kérése
+                                    </Button>
+                                    <Button
+                                      onclick={() => {
+                                        setSecondDialog(false);
+                                      }}
+                                      variant="secondary"
+                                    >
+                                      Mégse
+                                    </Button>
+                                  </div>
+                                </DialogFooter>
+                              </DialogContent>
+                            }
+                          >
+                            <DialogContent
+                              noDefaultCloseButton={true}
+                              class="py-4"
                             >
-                              <FaSolidXmark
-                                size={20}
-                                class="text-muted-foreground"
-                              />
-                            </Button>
-                          </DialogHeader>
+                              <DialogHeader class="flex-row items-center">
+                                <DialogTitle class="text-xl">
+                                  {team.name} adatai
+                                </DialogTitle>
+                                <Button
+                                  size="icon"
+                                  variant="secondary"
+                                  class="-mr-2 ml-auto"
+                                  onClick={() => setOpen(false)}
+                                >
+                                  <FaSolidXmark
+                                    size={20}
+                                    class="text-muted-foreground"
+                                  />
+                                </Button>
+                              </DialogHeader>
 
-                          <Hr padding="1.5rem" />
-                          <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center gap-2 font-semibold">
-                              <FaSolidSchool />
-                              <span class="line-clamp-2 break-words">
-                                Iskola neve
-                              </span>
-                            </div>
-                            {team.school.name}
-                          </div>
-                          <div class="grid w-full grid-cols-2 gap-4">
-                            <div class="flex flex-col gap-0.5">
-                              <div class="flex items-center gap-2 font-semibold">
-                                <BiRegularCategoryAlt />
-                                <span class="line-clamp-2 break-words">
-                                  Kategória
-                                </span>
+                              <Hr padding="1.5rem" />
+                              <div class="flex flex-col gap-0.5">
+                                <div class="flex items-center gap-2 font-semibold">
+                                  <FaSolidSchool />
+                                  <span class="line-clamp-2 break-words">
+                                    Iskola neve
+                                  </span>
+                                </div>
+                                {team.school.name}
                               </div>
-                              {team.category.name}
-                            </div>
-                            <div class="flex flex-col gap-0.5">
-                              <div class="flex items-center gap-2 font-semibold">
-                                <FiCode />
-                                <span class="line-clamp-2 break-words">
-                                  Programnyelv
-                                </span>
+                              <div class="grid w-full grid-cols-2 gap-4">
+                                <div class="flex flex-col gap-0.5">
+                                  <div class="flex items-center gap-2 font-semibold">
+                                    <BiRegularCategoryAlt />
+                                    <span class="line-clamp-2 break-words">
+                                      Kategória
+                                    </span>
+                                  </div>
+                                  {team.category.name}
+                                </div>
+                                <div class="flex flex-col gap-0.5">
+                                  <div class="flex items-center gap-2 font-semibold">
+                                    <FiCode />
+                                    <span class="line-clamp-2 break-words">
+                                      Programnyelv
+                                    </span>
+                                  </div>
+                                  {team.prog_lang.name}
+                                </div>
                               </div>
-                              {team.prog_lang.name}
-                            </div>
-                          </div>
-                          <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center gap-2 font-semibold">
-                              <BsPeopleFill />
-                              <span class="line-clamp-2 break-words">
-                                Csapattagok
-                              </span>
-                            </div>
-                            {team.members
-                              .map((x) => `${x.name} (${x.grade}.)`)
-                              .join(", ") +
-                              (team.supplementary_members?.at(0)?.name
-                                ? ", " +
-                                  team.supplementary_members
-                                    ?.map(
-                                      (x) => `${x.name} (${x.grade}. - pót)`,
-                                    )
-                                    .at(0)
-                                : "")}
-                          </div>
-                          <div class="grid w-full grid-cols-2 gap-4">
-                            <div class="flex flex-col gap-0.5">
-                              <div class="flex items-center gap-2 font-semibold">
-                                <FaSolidPersonChalkboard />
-                                <span class="line-clamp-2 break-words">
-                                  Felkészítő tanár(ok)
-                                </span>
+                              <div class="flex flex-col gap-0.5">
+                                <div class="flex items-center gap-2 font-semibold">
+                                  <BsPeopleFill />
+                                  <span class="line-clamp-2 break-words">
+                                    Csapattagok
+                                  </span>
+                                </div>
+                                {team.members
+                                  .map((x) => `${x.name} (${x.grade}.)`)
+                                  .join(", ") +
+                                  (team.supplementary_members?.at(0)?.name
+                                    ? ", " +
+                                      team.supplementary_members
+                                        ?.map(
+                                          (x) =>
+                                            `${x.name} (${x.grade}. - pót)`,
+                                        )
+                                        .at(0)
+                                    : "")}
                               </div>
-                              {team.teacher_name}
-                            </div>
-                            <div class="flex flex-col gap-0.5">
-                              <div class="flex items-center gap-2 font-semibold">
-                                <FaSolidHourglassEnd />
-                                <span class="line-clamp-2 break-words">
-                                  Állapot
-                                </span>
+                              <div class="grid w-full grid-cols-2 gap-4">
+                                <div class="flex flex-col gap-0.5">
+                                  <div class="flex items-center gap-2 font-semibold">
+                                    <FaSolidPersonChalkboard />
+                                    <span class="line-clamp-2 break-words">
+                                      Felkészítő tanár(ok)
+                                    </span>
+                                  </div>
+                                  {team.teacher_name}
+                                </div>
+                                <div class="flex flex-col gap-0.5">
+                                  <div class="flex items-center gap-2 font-semibold">
+                                    <FaSolidHourglassEnd />
+                                    <span class="line-clamp-2 break-words">
+                                      Állapot
+                                    </span>
+                                  </div>
+                                  <Badge
+                                    class="mt-1 w-fit"
+                                    variant={
+                                      {
+                                        registered: "secondary",
+                                        approved_by_organizer: "green",
+                                        approved_by_school: "yellow",
+                                      }[team.status] as
+                                        | "secondary"
+                                        | "green"
+                                        | "yellow"
+                                    }
+                                  >
+                                    {
+                                      {
+                                        registered: "iskolai jóváhagyásra vár",
+                                        approved_by_organizer: "jóváhagyva",
+                                        approved_by_school:
+                                          "szervezői jóváhagyásra vár",
+                                      }[team.status]
+                                    }
+                                  </Badge>
+                                </div>
                               </div>
-                              <Badge
-                                class="mt-1 w-fit"
-                                variant={
-                                  {
-                                    registered: "secondary",
-                                    approved_by_organizer: "green",
-                                    approved_by_school: "yellow",
-                                  }[team.status] as
-                                    | "secondary"
-                                    | "green"
-                                    | "yellow"
-                                }
-                              >
-                                {
-                                  {
-                                    registered: "iskolai jóváhagyásra vár",
-                                    approved_by_organizer: "jóváhagyva",
-                                    approved_by_school:
-                                      "szervezői jóváhagyásra vár",
-                                  }[team.status]
-                                }
-                              </Badge>
-                            </div>
-                          </div>
-                          <Hr padding="1.5rem" />
-                          <DialogFooter class="-mx-2 flex-col gap-4">
-                            <div class="flex w-full gap-4">
-                              {/* <Button
+                              <Hr padding="1.5rem" />
+                              <DialogFooter class="-mx-2 flex-col gap-4">
+                                <div class="flex w-full gap-4">
+                                  {/* <Button
                                 variant="warning"
                                 class="flex-1"
                                 onClick={() => {
@@ -424,45 +471,109 @@ const Teams: Component<{}> = () => {
                                 </Show>
                                 Módosítás kérése
                               </Button> */}
-                              <Button variant="warning" onClick={()=>{setSecondDialog(true)}} class="flex-1">
-                                  <FaSolidPen />
-                                Módosítás kérése
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                class="flex-1"
-                                onClick={() => {
-                                  deleteTeam(team.id);
-                                }}
-                                disabled={deleting()}
-                              >
-                                <Show when={!deleting()} fallback={<Spinner />}>
-                                  <FaSolidTrashCan />
+                                  <Button
+                                    variant="warning"
+                                    onClick={() => {
+                                      setSecondDialog(true);
+                                    }}
+                                    class="flex-1"
+                                  >
+                                    <FaSolidPen />
+                                    Módosítás kérése
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    class="flex-1"
+                                    onClick={() => {
+                                      deleteTeam(team.id);
+                                    }}
+                                    disabled={deleting()}
+                                  >
+                                    <Show
+                                      when={!deleting()}
+                                      fallback={<Spinner />}
+                                    >
+                                      <FaSolidTrashCan />
+                                    </Show>
+                                    Törlés
+                                  </Button>
+                                </div>
+                                <Show when={status() !== "registered"}>
+                                  <Button
+                                    variant="secondary"
+                                    class="flex-1"
+                                    onClick={() => setImageOpen(true)}
+                                  >
+                                    <FaSolidFile />
+                                    Jelentkezési lap
+                                  </Button>
                                 </Show>
-                                Törlés
+                                <Show
+                                  when={team.status === "approved_by_school"}
+                                >
+                                  <Button
+                                    variant="default"
+                                    onClick={() => {
+                                      approveTeam(team.id);
+                                    }}
+                                    disabled={approving()}
+                                  >
+                                    <Show
+                                      when={!approving()}
+                                      fallback={<Spinner />}
+                                    >
+                                      <FaSolidCheck />
+                                    </Show>
+                                    Jóváhagyás
+                                  </Button>
+                                </Show>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Show>
+                        </Dialog>
+
+                        <Dialog open={imageOpen()} onOpenChange={setImageOpen}>
+                          <DialogContent
+                            noDefaultCloseButton={true}
+                            class="h-[calc(100vh-3rem)] max-w-[calc(100vw-3rem)] overflow-hidden py-4"
+                          >
+                            <DialogHeader class="flex-row items-center">
+                              <DialogTitle class="text-xl">
+                                {team.name} jelentkezési lapja
+                              </DialogTitle>
+                              <Button
+                                size="icon"
+                                variant="secondary"
+                                class="-mr-2 ml-auto"
+                                onClick={() => setImageOpen(false)}
+                              >
+                                <FaSolidXmark
+                                  size={20}
+                                  class="text-muted-foreground"
+                                />
                               </Button>
-                            </div>
-                            <Show when={team.status === "approved_by_school"}>
+                            </DialogHeader>
+                            <Hr padding="1.5rem" />
+
+                            <img
+                              src={image()}
+                              alt={`${team.name} jelentkezési lapja`}
+                              class="mx-auto max-h-[70vh]"
+                            />
+
+                            <Hr padding="1.5rem" />
+                            <DialogFooter class="-mx-2 flex gap-4">
                               <Button
                                 variant="default"
-                                onClick={() => {
-                                  approveTeam(team.id);
-                                }}
-                                disabled={approving()}
+                                onClick={() => setImageOpen(false)}
                               >
-                                <Show
-                                  when={!approving()}
-                                  fallback={<Spinner />}
-                                >
-                                  <FaSolidCheck />
-                                </Show>
-                                Jóváhagyás
+                                <FaSolidXmark />
+                                Bezárás
                               </Button>
-                            </Show>
-                          </DialogFooter>
-                        </DialogContent>
-                        </Show>
-                      </Dialog>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </>
                     );
                   })()}
                 </CardHeader>
