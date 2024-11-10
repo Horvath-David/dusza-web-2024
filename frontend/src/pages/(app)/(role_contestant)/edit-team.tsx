@@ -122,9 +122,9 @@ const NewTeam: Component<{}> = () => {
   });
 
   createEffect(() => {
-    if (me()?.notifications[0] !== undefined) {
+    if (me()?.notifications?.at(0) !== undefined) {
       setNotify(true);
-      console.log(me()?.notifications[0]);
+      console.log(me()?.notifications?.at(0));
     }
   });
 
