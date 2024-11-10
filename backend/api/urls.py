@@ -11,6 +11,6 @@ urlpatterns = [
     path('config/', include(configure.urls)),
     path('me/', include(me.urls)),
     path('statistics/', response.statistics),
-    path('file/', file.urls),
+    path('file/', include(file.urls)),
 ]
 
