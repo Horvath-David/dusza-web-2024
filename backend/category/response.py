@@ -63,7 +63,7 @@ def delete_category(request: WSGIRequest, cat_id):
     if Team.objects.filter(category=lang_obj).exists():
         return JsonResponse({
             "status": "Error",
-            "error": "Nem tudtam kitörölni a kategóriát, mert már van benevezett csapat",
+            "error": "Nem tudtam kitörölni ezt kategóriát, mert van olyan csapat, aki ezt választotta nevezéskor",
         }, status=400)
     lang_obj.delete()
     return JsonResponse({

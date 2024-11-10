@@ -7,7 +7,7 @@ role_options = list(dict(ROLE_CHOICES).keys())
 
 
 def require_role(role_list):
-    if all(x in role_list for x in role_options):
+    if not all(x in role_options for x in role_list):
         raise ValueError(f"Invalid role(s) \"{role_list}\"")
     def decorator(view_func):
         @wraps(view_func)

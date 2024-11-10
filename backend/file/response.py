@@ -21,7 +21,7 @@ from io import BytesIO
 def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
     if not os.path.exists('files'):
         os.mkdir('files')
-    if len(request.FILES.getlist("file")):
+    if len(request.FILES.getlist("file")) > 1:
         return JsonResponse({
             "status": "Error",
             "error": "Egyszerre csak egy kép feltöltése engedélyezett",
