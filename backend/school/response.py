@@ -135,9 +135,8 @@ def manage_school(request: WSGIRequest, school_id):
             "error": "Hibás kérés",
         }, status=400)
 
-    school_obj = School.objects.get(id=school_id)
     if "school_name" in body.keys():
-        school_obj.name = body["school_name"]
+        school.name = body["school_name"]
     if "address" in body.keys():
         school.address = body["address"]
     school.save()
