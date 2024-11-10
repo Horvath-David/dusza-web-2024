@@ -2,6 +2,7 @@ export interface UserData {
   user_id: number;
   user_data_id: number;
   username: string;
+  email: string;
   display_name: string;
   role: string;
   grade?: number;
