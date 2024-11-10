@@ -152,10 +152,17 @@ def get_all_file(request: WSGIRequest):
 
 @require_http_methods(['GET'])
 @login_required
-@wrappers.require_role(['organizer'])
+@wrappers.require_role(['organizer', "school"])
 def get_by_team(request, team_id):
+    user_data = UserData.objects.get(user=request.user)
+    if user_data.role == "organizer":
+        return JsonResponse({
+            "status": "Ok",
+            "error": None,
+            "files": [i.name for i in File.objects.filter(team_id=team_id).order_by('-id')]
+        }, status=200)
     return JsonResponse({
         "status": "Ok",
         "error": None,
-        "files": [i.name for i in File.objects.filter(team_id=team_id).order_by('-id')]
+        "files": [i.name for i in File.objects.filter(team_id=team_id, owner=request.user).order_by('-id')]
     }, status=200)
