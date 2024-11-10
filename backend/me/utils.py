@@ -12,6 +12,7 @@ class ExtendedUserData(TypedDict):
     display_name: str
     role: str 
     grade: int | None
+    email: str | None
 
 
 def get_extended_user_data(user: User) -> ExtendedUserData:
@@ -25,4 +26,5 @@ def get_extended_user_data(user: User) -> ExtendedUserData:
         "display_name": user_data.display_name,
         "role": user_data.role,
         "grade": user_data.grade,
+        "email": user_data.user.email,
     }
