@@ -15,7 +15,7 @@ from authenticate import wrappers
 @require_GET
 @wrappers.require_role(["organizer"])
 def get_registration_deadline(request: WSGIRequest):
-    config_obj = Config.objects.first(name="reg_deadline")
+    config_obj = Config.objects.filter(name="reg_deadline").first()
 
     return JsonResponse({
         "status": "Ok",
