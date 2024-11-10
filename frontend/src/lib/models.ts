@@ -60,13 +60,12 @@ export interface Notification {
   manual_delete_enabled: boolean;
 }
 
-
 export interface FilterOptions {
   id: string;
   name: string;
 }
 
-export interface Statics{
+export interface Statics {
   number_of_shools: number;
   number_of_teams: number;
   number_of_teams_per_school: TeamsPerSchools[];
@@ -84,10 +83,10 @@ export interface TeamsPerStatus {
   team_count: number;
 }
 export interface TeamsPerCategory {
-  category: string;
+  category__name: string;
   team_count: number;
 }
-export interface TeamsPerProgLang{
+export interface TeamsPerProgLang {
   prog_lang__name: string;
   team_count: number;
 }
