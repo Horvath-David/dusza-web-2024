@@ -29,21 +29,25 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { BiRegularCategoryAlt } from "solid-icons/bi";
 import { FiCode } from "solid-icons/fi";
 import { Badge } from "~/components/ui/badge";
 import { Hr } from "~/components/Sidebar";
 import { Spinner } from "~/components/Spinner";
 
-
-const FILTER_REG: FilterOptions[]= [
-  {id:"", name:"Összes"},
-  {id:"registered", name:"Registrált"},
-  {id:"approved_by_school", name:"Jóváhagyásra vár"},
-  {id:"approved_by_organizer", name:"Jóváhagyott"},
-]
-
+const FILTER_REG: FilterOptions[] = [
+  { id: "", name: "Összes" },
+  { id: "registered", name: "Registrált" },
+  { id: "approved_by_school", name: "Jóváhagyásra vár" },
+  { id: "approved_by_organizer", name: "Jóváhagyott" },
+];
 
 async function getTeams() {
   const res = await makeRequest<{
@@ -88,7 +92,10 @@ const Teams: Component<{}> = () => {
   const [deleting, setDeleting] = createSignal(false);
   const [approving, setApproving] = createSignal(false);
 
-  const [filterByRegistry, setFilterByregistry] = createSignal<FilterOptions>({id:"", name:""})
+  const [filterByRegistry, setFilterByregistry] = createSignal<FilterOptions>({
+    id: "",
+    name: "",
+  });
 
   onMount(async () => {
     setLoading(true);
@@ -107,7 +114,9 @@ const Teams: Component<{}> = () => {
       toast.warning("Már küldtek értesítést ennek a csapatnak");
     } else if (!res.ok) {
       toast.error("Hiba történt!", {
-        description: `Ismeretlen hiba (${res.status} ${res.statusText})`,
+        description: res.data
+          ? res.data.error
+          : `Ismeretlen hiba (${res.status} ${res.statusText})`,
       });
     } else {
       toast.success("Sikeres üzenet küldés");
@@ -176,26 +185,36 @@ const Teams: Component<{}> = () => {
       <h1 class="my-8 text-2xl font-semibold">Csapatok</h1>
 
       <Show when={!loading()} fallback={<Spinner class="mt-12" />}>
-       
         <div class="grid w-full max-w-3xl grid-cols-1 gap-4">
-          <Select<FilterOptions> options={FILTER_REG}
-              placeholder="Szűrés"
-              optionValue="id"
-              optionTextValue="name"
-              
-              class="w-full"
-              value={filterByRegistry()}
-              onChange={setFilterByregistry}
-              itemComponent={(props) => (
-                <SelectItem item={props.item}>
-                  {props.item.rawValue.name}</SelectItem>
-              )}>
-                 <SelectTrigger class="w-48">
-              <SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
+          <Select<FilterOptions>
+            options={FILTER_REG}
+            placeholder="Szűrés"
+            optionValue="id"
+            optionTextValue="name"
+            class="w-full"
+            value={filterByRegistry()}
+            onChange={setFilterByregistry}
+            itemComponent={(props) => (
+              <SelectItem item={props.item}>
+                {props.item.rawValue.name}
+              </SelectItem>
+            )}
+          >
+            <SelectTrigger class="w-48">
+              <SelectValue<string>>
+                {(state) => state.selectedOption()}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent />
           </Select>
-          <For each={allTeamInfo().filter(x=>(filterByRegistry()?.id==="" ? ["registered", "approved_by_school", "approved_by_organizer"]:[filterByRegistry()?.id]).includes(x.status))}>
+          <For
+            each={allTeamInfo().filter((x) =>
+              (filterByRegistry()?.id === ""
+                ? ["registered", "approved_by_school", "approved_by_organizer"]
+                : [filterByRegistry()?.id]
+              ).includes(x.status),
+            )}
+          >
             {(team) => (
               <Card>
                 <CardHeader class="flex-row items-center border-b py-4">
