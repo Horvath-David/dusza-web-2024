@@ -80,7 +80,7 @@ def change_password(request: WSGIRequest):
 @require_GET
 def user_info(request: WSGIRequest):
     user_data = UserData.objects.get(user=request.user)
-    if user_data.role != "school:":
+    if user_data.role != "school":
         return JsonResponse({
             "status": "Ok",
             "error": None,
@@ -95,7 +95,7 @@ def user_info(request: WSGIRequest):
         "user_data": get_extended_user_data(request.user),
         "notifications": [model_to_dict(i, fields=["id", "title", "text", "manual_delete_enabled"])
                           for i in Notification.objects.filter(recipient=request.user)],
-        "school": model_to_dict(School.objects.get(communicator=request.user, fields=["name", "address"]))
+        "school": model_to_dict(School.objects.get(communicator=request.user), fields=["name", "address"])
     }, status=200)
 
 
