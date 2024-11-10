@@ -9,7 +9,9 @@ regisztráció vagy bejelentkezés után az oldalsávon található `Csapat hozz
 kattintva ki tudja tölteni a jelentkezési kérdőívet majd a lap alján található gombra
 kattintva be tudja küldeni. Nevezés után nincs lehetőség az iskola módosítására.
 Ha már korábban nevezett a csapatot akkor a `Csapat szerkesztése`
-gomb jelenik meg, ahol az adatok módosítására van lehetőség. Új csapat regisztrálására és
+gomb jelenik meg, ahol az adatok módosítására van lehetőség. Ezen az oldalon fognak
+megjelenni a csapatkapitánynak cíímzett értesítése (az szervezőktől érkező üzenetek,
+illetve az eltávolítási értesítések). Új csapat regisztrálására és
 az adatok módosítására csak a nevezési határidő lejárta előtt van lehetőség, útána a
 szerver visszautasít minden ilyen nemű kérést.
 
@@ -31,8 +33,9 @@ az összes benevezett csapat, akik az adott iskolát választották.
 
 A `Csapatok` menüben van lehetőség a nevezett csapatok jóváhagyására, eltávolítására
 valamint üzenetküldésre a csapatkapitány részére. Csapat törlésekor a rendszer 
-automatikusan értesíti a csapatkapitányt. Továbbá van lehetőség elfogadási 
-állaport szerint szűrni a csapatokat és exportálni az összes csapatot csv formátumban.
+automatikusan értesíti a csapatkapitányt, azonban a nevezési határidő vége előtt
+még van lehetősége új csapatot regisztrálni. Továbbá van lehetőség elfogadási 
+állapot szerint szűrni a csapatokat és exportálni az összes csapatot csv formátumban.
 
 A `Konfiguráció` menüpontban van lehetőság a nevezési határidő módosítására valamint
 az azonnali lezárásra.
@@ -48,7 +51,14 @@ A `Csapatok` menüben az iskolából jelentkezett csapatok elfogadásáara illet
 van lehetőség. Elfogadáskor szükséges feltölteni az aláírt nyomtatványt kép formátumban.
 Sikeres feltöltés után a csapat automatikusan elfogadásra kerül, ezután egy szervezőnek is
 el kell fogadnia. Elutasítás esetén a rendszer automatikusan értesítés küld a 
-csapatkapitánynak.
+csapatkapitánynak, azonban a nevezési határidő vége előtt még van lehetősége új 
+csapatot regisztrálni.
+
+# Bővítési lehetőségek
+A feladatmegoldás közben felemrült ötletként egy központi értesítési rendszer implementálása
+de a határidő miatt inkább nem csak részben csináltuk meg, hogy a követelményeknek 
+megfeleljen. Ez a központi értesítési még akár bővíthető lehetne egy email küldési 
+rendszerrel.
 
     Dusza panel
     Copyright (C) 2024  ${csapatnev} team (Béla Buczkó, Dávid Horváth, Márton Vad)
