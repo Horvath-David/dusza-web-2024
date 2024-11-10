@@ -291,7 +291,7 @@ def get_by_status(request: WSGIRequest, status: str):
 
 @login_required
 @require_POST
-@wrappers.require_role(["organizer", "school"])
+@wrappers.require_role(["organizer"])
 def change_status(request: WSGIRequest, status: str, team_id: int):
     valid_statuses = [i[0] for i in TEAM_STATUSES]
     if status not in valid_statuses:
@@ -300,22 +300,13 @@ def change_status(request: WSGIRequest, status: str, team_id: int):
             "error": "Hibás státusz",
         }, status=400)
 
-    user_data = UserData.objects.get(user=request.user)
     team = Team.objects.get(id=team_id)
 
-    if user_data.role == "school":
-        if status != "approved_by_school" or team.status != "registered":
-            return JsonResponse({
-                "status": "Error",
-                "error": "Nincs jogosultságod hogy végrehajtsd ezt a műveletet",
-            }, status=403)
-
-    if user_data.role == "organizer":
-        if status != "approved_by_organizer" or team.status != "approved_by_school":
-            return JsonResponse({
-                "status": "Error",
-                "error": "Nincs jogosultságod hogy végrehajtsd ezt a műveletet",
-            }, status=403)
+    if status != "approved_by_organizer" or team.status != "approved_by_school":
+        return JsonResponse({
+            "status": "Error",
+            "error": "Nincs jogosultságod hogy végrehajtsd ezt a műveletet",
+        }, status=403)
 
     team.status = status
     team.save()

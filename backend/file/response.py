@@ -1,6 +1,5 @@
 import os, mimetypes
 
-import json
 
 from django.db import IntegrityError
 from django.http import JsonResponse, FileResponse
@@ -58,6 +57,8 @@ def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
                     destination.write(chunk)
                     destination.flush()
 
+            team.status = "approved_by_school"
+            team.save()
         except IntegrityError:
             continue
 
