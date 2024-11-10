@@ -87,8 +87,6 @@ const NewTeam: Component<{}> = () => {
   const [loading, setLoading] = createSignal(true);
   const [saving, setSaving] = createSignal(false);
 
-  const [notify, setNotify] = createSignal(false);
-
   onMount(async () => {
     setLoading(true);
     setAllCategory(await getCategory());
@@ -119,13 +117,6 @@ const NewTeam: Component<{}> = () => {
     setProgrammingLang(team?.prog_lang);
 
     setLoading(false);
-  });
-
-  createEffect(() => {
-    if (me()?.notifications?.at(0) !== undefined) {
-      setNotify(true);
-      console.log(me()?.notifications?.at(0));
-    }
   });
 
   const handleSubmit = async (event: SubmitEvent) => {
@@ -190,7 +181,7 @@ const NewTeam: Component<{}> = () => {
       <h1 class="my-8 text-2xl font-semibold">Csapat szerkesztése</h1>
 
       <Show when={!loading()} fallback={<Spinner />}>
-        <Show when={notify()}>
+        <Show when={me()?.notifications.length != 0}>
           <Callout variant="warning">
             <CalloutTitle>{me()?.notifications?.at(0)?.title}</CalloutTitle>
             <CalloutContent>
