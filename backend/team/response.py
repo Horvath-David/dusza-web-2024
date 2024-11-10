@@ -172,6 +172,7 @@ def edit_team(request: WSGIRequest, team_id):
     try:
         body = json.loads(request.body)
         body.pop("status", None)
+        body.pop("school", None)
     except JSONDecodeError:
         return JsonResponse({
             "status": "Error",
