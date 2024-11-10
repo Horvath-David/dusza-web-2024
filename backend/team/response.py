@@ -137,27 +137,42 @@ def edit_team(request: WSGIRequest, team_id):
                 "status": "Ok",
                 "error": None,
             }, status=200)
+        if user_object.role == "organizer":
+            Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).delete()
+            user_data = UserData.objects.get(user=team.owner)
+            Notification.objects.create(
+                recipient=team.owner,
+                title="Törölték a nevezésedet",
+                text=f"Kedves {user_data.display_name}! "
+                     f"\nA(z) {Team.objects.get(id=team_id).name} nevű csapatod nevezését törölte egy szervező."
+                     f"\nHa még nem járt le a nevezési határidő, akkor még leadhatsz mégegy jelentkezést, de "
+                     f"legközelebb kérlek tégy eleget a szervezők kérésének."
+                     f"\nÜdvözlettel,"
+                     f"\nDusza panel",
+            )
+            team.delete()
 
-        Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).delete()
-        user_data = UserData.objects.get(user=team.owner)
-        Notification.objects.create(
-            recipient=team.owner,
-            title="Törölték a nevezésedet",
-            text=f"Kedves {user_data.display_name}! "
-                 f"\nA(z) {Team.objects.get(id=team_id).name} nevű csapatod nevezését törölte egy szervező."
-                 f"\nHa még nem járt le a nevezési határidő, akkor még leadhatsz mégegy jelentkezést, de "
-                 f"legközelebb kérlek tégy eleget a szervezők kérésének."
-                 f"\nÜdvözlettel,"
-                 f"\nDusza panel",
-        )
-        team.delete()
+            return JsonResponse({
+                "status": "Ok",
+                "error": None,
+            }, status=200)
+        if user_object.role == "school":
+            Notification.objects.filter(delete_on_modify__name="team", delete_on_modify__id=team_id).delete()
+            user_data = UserData.objects.get(user=team.owner)
+            Notification.objects.create(
+                recipient=team.owner,
+                title="Törölték a nevezésedet",
+                text=f"Kedves {user_data.display_name}! "
+                     f"\nA(z) {Team.objects.get(id=team_id).name} nevű csapatod nevezését törölte az iskolád."
+                     f"\nEnnek két oka lehet:"
+                     f"\n1. Az iskolád nem kívanja állni a nevezési díjaidat"
+                     f"\n2. Rossz iskolát választottál és az iskola kapcsolattartója nem ismert rá a nevezésedre. Ebben az esetben nyugodtan leadhatsz mégegy jelentkezést"
+                     f"\nÜdvözlettel,"
+                     f"\nDusza panel",
+            )
+            team.delete()
 
-        return JsonResponse({
-            "status": "Ok",
-            "error": None,
-        }, status=200)
-
-    if user_object.role == "organizer":
+    if user_object.role == "organizer" or user_object.role == "school":
         return JsonResponse({
             "status": "Ok",
             "error": "Nincs jogosultságod, hogy végrehajtsd ezt a műveletet",
