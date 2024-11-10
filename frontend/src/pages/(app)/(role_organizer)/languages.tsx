@@ -24,7 +24,8 @@ import {
 import {
   FaSolidCheck,
   FaSolidPlus,
-  FaSolidTrashCan, FaSolidXmark
+  FaSolidTrashCan,
+  FaSolidXmark,
 } from "solid-icons/fa";
 import { makeRequest } from "~/lib/api";
 import { Button } from "~/components/ui/button";
@@ -47,11 +48,14 @@ const ProgrammingLangs: Component<{}> = () => {
   const [newProgLang, setNewProgLang] = createSignal("");
   const [allProgLang, setAllProgLang] = createSignal<ProgrammingLanguage[]>([]);
 
+  const [loading, setLoading] = createSignal(false);
   const [deleting, setDeleting] = createSignal(false);
   const [adding, setAdding] = createSignal(false);
 
   onMount(async () => {
+    setLoading(true);
     setAllProgLang(await getAllProgLang());
+    setLoading(false);
   });
 
   const handleSubmitNewProgLang = async (event: SubmitEvent) => {
@@ -104,85 +108,92 @@ const ProgrammingLangs: Component<{}> = () => {
         </Button>
       </form>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nyelvek</TableHead>
-            <TableHead class="text-right">
-              <span class="mr-1.5 inline-block">Törlés</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <For each={allProgLang()}>
-            {(progLang) => (
-              <TableRow>
-                <TableCell>{progLang.name}</TableCell>
-                <TableCell class="text-right">
-                  {(() => {
-                    const [open, setOpen] = createSignal(false);
-
-                    return (
-                      <Dialog open={open()} onOpenChange={setOpen}>
-                        <DialogTrigger class="ml-auto">
-                          <Button variant="destructive" size="icon">
-                            <FaSolidTrashCan />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent noDefaultCloseButton={true} class="py-4">
-                          <DialogHeader class="flex-row items-center">
-                            <DialogTitle class="text-xl">
-                              Biztos, hogy szeretné törölni?
-                            </DialogTitle>
-                            <Button
-                              size="icon"
-                              variant="secondary"
-                              class="-mr-2 ml-auto"
-                              onClick={() => setOpen(false)}
-                            >
-                              <FaSolidXmark
-                                size={20}
-                                class="text-muted-foreground"
-                              />
+      <Show when={!loading()} fallback={<Spinner class="mt-12" />}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nyelvek</TableHead>
+              <TableHead class="text-right">
+                <span class="mr-1.5 inline-block">Törlés</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <For each={allProgLang()}>
+              {(progLang) => (
+                <TableRow>
+                  <TableCell>{progLang.name}</TableCell>
+                  <TableCell class="text-right">
+                    {(() => {
+                      const [open, setOpen] = createSignal(false);
+                      return (
+                        <Dialog open={open()} onOpenChange={setOpen}>
+                          <DialogTrigger class="ml-auto">
+                            <Button variant="destructive" size="icon">
+                              <FaSolidTrashCan />
                             </Button>
-                          </DialogHeader>
-                          <Hr padding="1.5rem" />
-                          <DialogFooter class="-mx-2 flex-col gap-4">
-                            <div class="flex w-full gap-4">
+                          </DialogTrigger>
+                          <DialogContent
+                            noDefaultCloseButton={true}
+                            class="py-4"
+                          >
+                            <DialogHeader class="flex-row items-center">
+                              <DialogTitle class="text-xl">
+                                Biztos, hogy szeretné törölni?
+                              </DialogTitle>
                               <Button
+                                size="icon"
                                 variant="secondary"
-                                class="flex-1"
+                                class="-mr-2 ml-auto"
                                 onClick={() => setOpen(false)}
                               >
-                                <FaSolidXmark />
-                                Nem
+                                <FaSolidXmark
+                                  size={20}
+                                  class="text-muted-foreground"
+                                />
                               </Button>
-                              <Button
-                                variant="destructive"
-                                class="flex-1"
-                                onClick={() => {
-                                  deleteProgLang(progLang.id);
-                                  setNewProgLang("");
-                                }}
-                                disabled={deleting()}
-                              >
-                                <Show when={!deleting()} fallback={<Spinner />}>
-                                  <FaSolidCheck />
-                                </Show>
-                                Igen
-                              </Button>
-                            </div>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    );
-                  })()}
-                </TableCell>
-              </TableRow>
-            )}
-          </For>
-        </TableBody>
-      </Table>
+                            </DialogHeader>
+                            <Hr padding="1.5rem" />
+                            <DialogFooter class="-mx-2 flex-col gap-4">
+                              <div class="flex w-full gap-4">
+                                <Button
+                                  variant="secondary"
+                                  class="flex-1"
+                                  onClick={() => setOpen(false)}
+                                >
+                                  <FaSolidXmark />
+                                  Nem
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  class="flex-1"
+                                  onClick={() => {
+                                    deleteProgLang(progLang.id);
+                                    setNewProgLang("");
+                                  }}
+                                  disabled={deleting()}
+                                >
+                                  <Show
+                                    when={!deleting()}
+                                    fallback={<Spinner />}
+                                  >
+                                    <FaSolidCheck />
+                                  </Show>
+                                  Igen
+                                </Button>
+                              </div>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      );
+                    })()}
+                  </TableCell>
+                </TableRow>
+              )}
+            </For>
+          </TableBody>
+        </Table>
+      </Show>
     </div>
   );
 };
