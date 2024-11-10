@@ -95,16 +95,16 @@ def create_team(request: WSGIRequest):
 
 @login_required
 @require_http_methods(["PATCH", "DELETE"])
-@wrappers.require_role(["contestant", "organizer"])
+@wrappers.require_role(["contestant", "organizer", "school"])
 def edit_team(request: WSGIRequest, team_id):
     user_object = UserData.objects.get(user=request.user)
-    if Team.objects.get(id=team_id).owner != request.user and user_object.role != "organizer":
-        return JsonResponse({
-            "status": "Error",
-            "error": "Sajnálom, de csak a csapatot regisztráló felhasználó vonhjatja vissza ezt nevezést",
-        }, status=403)
 
     if request.method == "DELETE":
+        if Team.objects.get(id=team_id).owner != request.user and user_object.role not in ["organizer", "school"]:
+            return JsonResponse({
+                "status": "Error",
+                "error": "Sajnálom, de csak a csapatot regisztráló felhasználó vonhjatja vissza ezt nevezést",
+            }, status=403)
         team = Team.objects.get(id=team_id)
         if user_object.role == "contestant":
             if datetime.now() > datetime.fromisoformat(Config.objects.get(name="reg_deadline").data["date"]):
