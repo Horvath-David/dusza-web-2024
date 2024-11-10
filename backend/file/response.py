@@ -19,6 +19,7 @@ from io import BytesIO
 @login_required
 @wrappers.require_role(['school'])
 def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
+    file_name = None
     if not os.path.exists('files'):
         os.mkdir('files')
     if len(request.FILES.getlist("file")) > 1:
@@ -47,7 +48,7 @@ def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
                 }, status=403)
             file_name = f"Registration document for team no{team_id}"
             File.objects.create(
-                name=file.name,
+                name=file_name,
                 path='files/' + file_name+file.name.split('.')[-1],
                 file_type='image',
                 owner=request.user,
@@ -63,21 +64,38 @@ def upload_image(request: WSGIRequest, team_id) -> JsonResponse:
         except IntegrityError:
             continue
 
-    return JsonResponse({'status': 'Ok'}, status=200)
+    return JsonResponse({
+        "status": "Ok",
+        "error": None,
+        "file_name": file_name
+    }, status=200)
 
 
 @login_required
 @require_http_methods(['GET'])
 @wrappers.require_role(['school', 'organizer'])
 def get_file(request, file_name):
+    user_data = UserData.objects.get(user=request.user)
+
     # Prevent path traversal attacks by cleaning up file name
     if ".." in file_name:
-        return JsonResponse({'error': 'Bad Request'}, status=400)
+        return JsonResponse({
+            "status": "Error",
+            'error': 'Biztonsági okokból nem vagyok hajlandó eleget tenni a kérésednek'
+        }, status=400)
 
     if not File.objects.filter(name=file_name).exists():
-        return JsonResponse({'status': 'Not Found'}, status=404)
+        return JsonResponse({
+            "status": "Error",
+            "error": 'Nem találtam ilyen fájlt'
+        }, status=404)
 
     file_object = File.objects.get(name=file_name)
+    if user_data.role == "school" and file_object.team.school.communicator != request.user:
+        return JsonResponse({
+            "status": "Error",
+            "error": "Nincs jogusultságod, hogy megtekintsd ezt a fájlt",
+        }, status=404)
 
     # Path to the file
     file_path = file_object.path
